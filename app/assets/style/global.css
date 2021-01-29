@@ -1,0 +1,50 @@
+@charset 'utf-8';
+@import 'normalize.css';
+body,
+html {
+  height: 100vh;
+  background: #cccbca;
+  font-family: Arial, Helvetica, Helvetica Neue, serif;
+}
+#root {
+  height: 100%;
+}
+i {
+  font-style: normal;
+}
+img {
+  max-width: 100%;
+  object-fit: cover;
+  vertical-align: middle;
+}
+p,
+label,
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-weight: normal;
+  line-height: 1;
+}
+.fl {
+  float: left;
+}
+.fr {
+  float: right;
+}
+.clearfix::after {
+  content: '.';
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+.ant-btn-primary {
+  color: #fff;
+  background: #1890ff;
+  border-color: #1890ff;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
+  -webkit-box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+}

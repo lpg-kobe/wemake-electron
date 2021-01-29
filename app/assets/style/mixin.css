@@ -1,0 +1,27 @@
+.limit {
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.break {
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+.flex {
+  display: flex;
+}
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+}
+.flex-around {
+  display: flex;
+  justify-content: space-around;
+}

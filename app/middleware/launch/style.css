@@ -1,0 +1,38 @@
+.launch-page-main {
+  background: #000;
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+  overflow: hidden;
+}
+.launch-page-contain {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.launch-page-contain .launch-bg {
+  width: 384px;
+  height: 100px;
+  background: url(~assets/img/i-logo-launch.png) no-repeat center / 100%;
+}
+.launch-page-contain h1 {
+  text-align: center;
+  font-size: 28px;
+  margin-top: 28px;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+.launch-page-footer {
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  bottom: 30px;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.5);
+}

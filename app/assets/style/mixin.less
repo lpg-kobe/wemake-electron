@@ -1,0 +1,59 @@
+@color: #2691E9;
+@hovColor: #40a9ff;
+@dangerColor: #E65E50;
+@hovDangerColor: #ff7875;
+@viewportHeight: 100vh;
+@viewportWidth: 100vw;
+@sidebarWidth: 90px;
+@menuHeight: 50px;
+@chatMenuHeight: 46px;
+@chatInputHeight: 150px;
+// 公用modal弹窗头部高度
+@modalTitleHeight: 64px;
+// 聊天输入控件总高度
+@headerHeight: 50px;
+@footerHeight: 30px;
+@videoHeight: @viewportHeight - @headerHeight - @menuHeight - @footerHeight;
+@videoRate: 895 / 590;
+@thumbRate: 295 / 166;
+
+.limit {
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.break {
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.limit(@line) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: @line;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+}
+
+.flex-around {
+  display: flex;
+  justify-content: space-around;
+}

@@ -1,0 +1,18 @@
+{
+  "name": "live-of-ofweek",
+  "productName": "wemake",
+  "version": "v1.0.0",
+  "description": "wemake",
+  "main": "./main.prod.js",
+  "author": {
+    "name": "pika",
+    "email": "961472355@qq.com",
+    "url": "https://github.com/lpg-kobe/electron-react"
+  },
+  "scripts": {
+    "electron-rebuild": "node -r ../internals/scripts/BabelRegister.js ../internals/scripts/ElectronRebuild.js",
+    "postinstall": "yarn electron-rebuild"
+  },
+  "license": "MIT",
+  "dependencies": {}
+}
