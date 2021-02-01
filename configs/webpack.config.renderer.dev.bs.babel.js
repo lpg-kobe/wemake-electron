@@ -1,5 +1,5 @@
 /**
- * Build config for development electron renderer process that uses
+ * Build config for development in browser that uses
  * Hot-Module-Replacement
  *
  * https://webpack.js.org/concepts/hot-module-replacement/
@@ -9,11 +9,13 @@ import path from 'path'
 import fs from 'fs'
 import webpack from 'webpack'
 import chalk from 'chalk'
-import { merge } from 'webpack-merge'
-import { spawn, execSync } from 'child_process'
+import htmlWebpackPlugin from 'html-webpack-plugin'
+import { execSync } from 'child_process'
 import { TypedCssModulesPlugin } from 'typed-css-modules-webpack-plugin'
-import baseConfig from './webpack.config.base'
 import CheckNodeEnv from '../internals/scripts/CheckNodeEnv'
+
+import { dependencies as externals } from '../app/package.json'
+import { readFile2Json } from './tool'
 
 // When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
 // at the dev webpack config is not accidentally run in a production environment
@@ -21,12 +23,17 @@ if (process.env.NODE_ENV === 'production') {
   CheckNodeEnv('development')
 }
 
-const port = process.env.PORT || 1212
-const publicPath = `http://localhost:${port}/dist`
+const appRoot = path.join(__dirname, '..', 'app')
+const { defineKey } =
+  process.env.NODE_ENV === 'production'
+    ? readFile2Json(path.join(appRoot, './.env.prod'))
+    : readFile2Json(path.join(appRoot, './.env.dev'))
+const port = process.env.PORT || 8024
+const publicPath = "./"
 const dll = path.join(__dirname, '..', 'dll')
 const manifest = path.resolve(dll, 'renderer.json')
 const requiredByDLLConfig = module.parent.filename.includes(
-  'webpack.config.renderer.dev.dll'
+  'webpack.config.renderer.dev.bs.dll'
 )
 
 /**
@@ -41,30 +48,42 @@ if (!requiredByDLLConfig && !(fs.existsSync(dll) && fs.existsSync(manifest))) {
   execSync('yarn build-dll')
 }
 
-export default merge(baseConfig, {
-  devtool: 'inline-source-map',
+export default {
+  externals: [...Object.keys(externals || {})],
+
+  devtool: 'source-map',
 
   mode: 'development',
-
-  target: 'electron-renderer',
 
   entry: [
     // this can config only in development during electron, base in version 80 of chrome
     'core-js',
     'regenerator-runtime/runtime',
-    ...(process.env.PLAIN_HMR ? [] : ['react-hot-loader/patch']),
-    `webpack-dev-server/client?http://localhost:${port}/`,
-    'webpack/hot/only-dev-server',
+    // ...(process.env.PLAIN_HMR ? [] : ['react-hot-loader/patch']),
+    // `webpack-dev-server/client?http://localhost:${port}/`,
+    // 'webpack/hot/only-dev-server',
     require.resolve('../app/index.tsx')
   ],
 
   output: {
-    publicPath: `http://localhost:${port}/dist/`,
-    filename: 'renderer.dev.js'
+    path: appRoot,
+    publicPath,
+    filename: 'renderer.dev.js',
+    chunkFilename: 'js/[name].render.chunk.js'
   },
 
   module: {
     rules: [
+      {
+        test: /\.(js|jsx|tsx|ts)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            cacheDirectory: true
+          }
+        }
+      },
       {
         test: /\.global\.css$/,
         use: [
@@ -206,28 +225,37 @@ export default merge(baseConfig, {
     ]
   },
   resolve: {
+    extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
+    modules: [appRoot, 'node_modules'],
     alias: {
-      'react-dom': '@hot-loader/react-dom'
+      '@': appRoot,
+      // bindings: path.resolve(__dirname, './bindings.js')
     }
   },
   plugins: [
-    requiredByDLLConfig
-      ? null
-      : new webpack.DllReferencePlugin({
-          context: path.join(__dirname, '..', 'dll'),
-          manifest: require(manifest),
-          sourceType: 'var'
-        }),
+    // requiredByDLLConfig
+    //   ? null
+    //   : new webpack.DllReferencePlugin({
+    //       context: path.join(__dirname, '..', 'dll'),
+    //       manifest: require(manifest),
+    //       sourceType: 'var'
+    //     }),
 
-    new webpack.HotModuleReplacementPlugin({
-      multiStep: true
-    }),
+    // new webpack.HotModuleReplacementPlugin({
+    //   multiStep: true
+    // }),
+
+    new webpack.DefinePlugin(defineKey),
 
     new TypedCssModulesPlugin({
       globPattern: 'app/**/*.{css,scss,sass}'
     }),
 
     new webpack.NoEmitOnErrorsPlugin(),
+
+    new htmlWebpackPlugin({
+      template: path.join(__dirname, '../app/app.html')
+    }),
 
     /**
      * Create global constants which can be configured at compile time.
@@ -245,54 +273,28 @@ export default merge(baseConfig, {
       NODE_ENV: 'development'
     }),
 
-    new webpack.LoaderOptionsPlugin({
-      debug: true
-    })
+    // new webpack.LoaderOptionsPlugin({
+    //   debug: true
+    // })
   ],
 
-  node: {
-    __dirname: false,
-    __filename: false
-  },
+  // node: {
+  //   __dirname: false,
+  //   __filename: false
+  // },
 
   devServer: {
-    // proxy: [
-    //   {
-    //     context: ['/login', '/api'],
-    //     target: 'http://newlive.ofweek.com/api/web/',
-    //   },
-    // ],
+    open: true,
     port,
-    publicPath,
-    compress: true,
-    noInfo: false,
-    stats: 'errors-only',
-    inline: true,
-    lazy: false,
     hot: true,
-    headers: { 'Access-Control-Allow-Origin': '*' },
-    contentBase: path.join(__dirname, 'dist'),
-    watchOptions: {
-      aggregateTimeout: 300,
-      ignored: /node_modules/,
-      poll: 100
-    },
+    compress: true,
     historyApiFallback: {
-      verbose: true,
-      disableDotRule: false
+        index: 'app.html',
     },
-    // create main process before webpack render page
-    before () {
-      if (process.env.START_HOT) {
-        console.log('Starting Main Process by electron...')
-        spawn('npm', ['run', 'start-main-dev'], {
-          shell: true,
-          env: process.env,
-          stdio: 'inherit'
-        })
-          .on('close', code => process.exit(code))
-          .on('error', spawnError => console.error(spawnError))
-      }
-    }
+    stats: {
+        colors: true
+    },
+    contentBase: [path.join(__dirname, '../resources'), path.join(__dirname, '../app/dist')],
+    watchContentBase: true
   }
-})
+}

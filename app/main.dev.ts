@@ -169,7 +169,7 @@ const createWindow = (namespace: string, config: any) => {
   totalWindow[namespace].config = windowConfig
   totalWindow[namespace].loadURL(config.url);
   // open devtool in dev
-  // totalWindow[namespace].webContents.openDevTools({ mode: 'detach' })
+  totalWindow[namespace].webContents.openDevTools({ mode: 'detach' })
 
   // close window by closeNamespace which you need to close
   closeNamespace && totalWindow[closeNamespace].close()

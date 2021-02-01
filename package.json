@@ -10,6 +10,7 @@
     "build-main": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.main.prod.babel.js --colors",
     "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.babel.js --colors",
     "dev": "cross-env START_HOT=1 node -r @babel/register ./internals/scripts/CheckPortInUse.js && cross-env START_HOT=1 yarn start-renderer-dev",
+    "dev-bs": "cross-env START_HOT=1 node -r @babel/register ./internals/scripts/CheckPortInUse.js && cross-env START_HOT=1 yarn start-renderer-dev-bs",
     "electron-rebuild": "electron-rebuild --parallel --force --types prod,dev,optional --module-dir app",
     "lint": "cross-env NODE_ENV=development eslint . --cache --ext .js,.jsx,.ts,.tsx",
     "lint-fix": "yarn --silent lint --fix",
@@ -30,6 +31,7 @@
     "start-main-debug": "yarn start-main-dev --inspect=5858 --remote-debugging-port=9223",
     "start-main-dev": "cross-env START_HOT=1 NODE_ENV=development electron -r ./internals/scripts/BabelRegister ./app/main.dev.ts",
     "start-renderer-dev": "cross-env NODE_ENV=development webpack-dev-server --config configs/webpack.config.renderer.dev.babel.js",
+    "start-renderer-dev-bs": "cross-env NODE_ENV=development webpack-dev-server --config configs/webpack.config.renderer.dev.bs.babel.js",
     "test": "cross-env BABEL_DISABLE_CACHE=1 jest",
     "test-all": "yarn lint && yarn tsc && yarn build && yarn test",
     "test-e2e": "node -r @babel/register ./internals/scripts/CheckBuildsExist.js && cross-env NODE_ENV=test testcafe electron:./app ./test/e2e/HomePage.e2e.ts",
@@ -73,6 +75,12 @@
           "y": 220,
           "type": "link",
           "path": "/Applications"
+        }
+      ],
+      "extraFiles": [
+        {
+          "from": "node_modules/@serialport/bindings/build/Release",
+          "to": "./Resources"
         }
       ]
     },
