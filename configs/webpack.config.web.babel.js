@@ -1,55 +1,28 @@
 /**
- * Build config for development in browser that uses
- * Hot-Module-Replacement
- *
- * https://webpack.js.org/concepts/hot-module-replacement/
- */
+* @desc local dev server from webpack-dev-server
+* @author pika
+*/
 
-import path from 'path'
-import fs from 'fs'
-import webpack from 'webpack'
-import chalk from 'chalk'
-import htmlWebpackPlugin from 'html-webpack-plugin'
-import { execSync } from 'child_process'
-import { TypedCssModulesPlugin } from 'typed-css-modules-webpack-plugin'
-import CheckNodeEnv from '../internals/scripts/CheckNodeEnv'
-
-import { dependencies as externals } from '../app/package.json'
-import { readFile2Json } from './tool'
-
-// When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
-// at the dev webpack config is not accidentally run in a production environment
-if (process.env.NODE_ENV === 'production') {
-  CheckNodeEnv('development')
-}
+'use strict';
+const webpack = require('webpack')
+const htmlWebpackPlugin = require('html-webpack-plugin')
+const devServer = require('webpack-dev-server')
+const { merge } = require('webpack-merge')
+const { readFile2Json } = require('./tool')
+const { TypedCssModulesPlugin } = require('typed-css-modules-webpack-plugin')
+const { dependencies } = require('../app/package.json')
+const path = require('path')
 
 const appRoot = path.join(__dirname, '..', 'app')
 const { defineKey } =
   process.env.NODE_ENV === 'production'
     ? readFile2Json(path.join(appRoot, './.env.prod'))
     : readFile2Json(path.join(appRoot, './.env.dev'))
-const port = process.env.PORT || 8024
-const publicPath = "./"
-const dll = path.join(__dirname, '..', 'dll')
-const manifest = path.resolve(dll, 'renderer.json')
-const requiredByDLLConfig = module.parent.filename.includes(
-  'webpack.config.renderer.dev.bs.dll'
-)
 
-/**
- * Warn if the DLL is not built
- */
-if (!requiredByDLLConfig && !(fs.existsSync(dll) && fs.existsSync(manifest))) {
-  console.log(
-    chalk.black.bgYellow.bold(
-      'The DLL files are missing. Sit back while we build them for you with "yarn build-dll"'
-    )
-  )
-  execSync('yarn build-dll')
-}
-
-export default {
-  externals: [...Object.keys(externals || {})],
+const baseConfig = {
+  externals: [ 
+    ...Object.keys(dependencies || {})
+  ],
 
   devtool: 'source-map',
 
@@ -57,17 +30,18 @@ export default {
 
   entry: [
     // this can config only in development during electron, base in version 80 of chrome
-    'core-js',
-    'regenerator-runtime/runtime',
+    // 'core-js',
+    // 'regenerator-runtime/runtime',
     // ...(process.env.PLAIN_HMR ? [] : ['react-hot-loader/patch']),
     // `webpack-dev-server/client?http://localhost:${port}/`,
     // 'webpack/hot/only-dev-server',
-    require.resolve('../app/index.tsx')
+    path.join(appRoot, './index.tsx')
+    // require.resolve('../app/index.tsx')
   ],
 
   output: {
-    path: appRoot,
-    publicPath,
+    path: path.join(appRoot,'./dist'),
+    // publicPath,
     filename: 'renderer.dev.js',
     chunkFilename: 'js/[name].render.chunk.js'
   },
@@ -221,6 +195,20 @@ export default {
       {
         test: /\.(?:ico|gif|png|jpg|jpeg|webp)$/,
         use: 'url-loader'
+      },
+      {
+        test: /\.node$/,
+        use: [
+          {
+            loader: 'native-ext-loader',
+            options: {
+              emit: false,
+              // tell webpack to find *.node file in directory we set
+              rewritePath:
+                process.env.NODE_ENV === 'production'? './' : 'node_modules/@serialport/bindings/build/Release/'
+            }
+          }
+        ]
       }
     ]
   },
@@ -229,7 +217,7 @@ export default {
     modules: [appRoot, 'node_modules'],
     alias: {
       '@': appRoot,
-      // bindings: path.resolve(__dirname, './bindings.js')
+      bindings: path.resolve(__dirname, './bindings.js')
     }
   },
   plugins: [
@@ -251,10 +239,10 @@ export default {
       globPattern: 'app/**/*.{css,scss,sass}'
     }),
 
-    new webpack.NoEmitOnErrorsPlugin(),
+    // new webpack.NoEmitOnErrorsPlugin(),
 
     new htmlWebpackPlugin({
-      template: path.join(__dirname, '../app/app.html')
+      template: path.join(appRoot, './app.html')
     }),
 
     /**
@@ -276,16 +264,25 @@ export default {
     // new webpack.LoaderOptionsPlugin({
     //   debug: true
     // })
-  ],
+  ]
+}
 
-  // node: {
-  //   __dirname: false,
-  //   __filename: false
-  // },
-
-  devServer: {
+const devConfig = merge(baseConfig, {
+    mode: 'development',
+    output: {
+    },
+    devtool: 'source-map',
+    module: {
+    },
+    optimization: {
+    },
+    plugins: [
+        
+    ]
+})
+const compiler = webpack(devConfig)
+const devOption = {
     open: true,
-    port,
     hot: true,
     compress: true,
     historyApiFallback: {
@@ -294,7 +291,10 @@ export default {
     stats: {
         colors: true
     },
-    contentBase: [path.join(__dirname, '../resources'), path.join(__dirname, '../app/dist')],
+    contentBase: [path.join(__dirname, '../resources'), path.join(appRoot, './dist')],
     watchContentBase: true
-  }
 }
+const Server = new devServer(compiler, devOption)
+Server.listen(8024, 'localhost', () => {
+    console.log(`Server is listen on ${8024}`)
+})

@@ -5,6 +5,7 @@
 
 import dva from 'dva';
 import '@/assets/style/global.less';
+import './utils/i18n'
 
 const routes = require('./routes').default;
 const systemModal = require('./models/system').default;

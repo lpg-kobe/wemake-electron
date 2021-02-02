@@ -3,7 +3,7 @@
  * find some *.node & require witch build from c++
  */
 
-var fs = require('fs'),
+const fs = require('fs'),
   path = require('path'),
   fileURLToPath = require('file-uri-to-path'),
   join = path.join,
