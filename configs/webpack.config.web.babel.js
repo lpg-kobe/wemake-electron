@@ -29,12 +29,6 @@ const baseConfig = {
   mode: 'development',
 
   entry: [
-    // this can config only in development during electron, base in version 80 of chrome
-    // 'core-js',
-    // 'regenerator-runtime/runtime',
-    // ...(process.env.PLAIN_HMR ? [] : ['react-hot-loader/patch']),
-    // `webpack-dev-server/client?http://localhost:${port}/`,
-    // 'webpack/hot/only-dev-server',
     path.join(appRoot, './index.tsx')
     // require.resolve('../app/index.tsx')
   ],
@@ -200,13 +194,8 @@ const baseConfig = {
         test: /\.node$/,
         use: [
           {
-            loader: 'native-ext-loader',
-            options: {
-              emit: false,
-              // tell webpack to find *.node file in directory we set
-              rewritePath:
-                process.env.NODE_ENV === 'production'? './' : 'node_modules/@serialport/bindings/build/Release/'
-            }
+            loader: 'node-loader',
+            options: {}
           }
         ]
       }
@@ -216,8 +205,7 @@ const baseConfig = {
     extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
     modules: [appRoot, 'node_modules'],
     alias: {
-      '@': appRoot,
-      bindings: path.resolve(__dirname, './bindings.js')
+      '@': appRoot
     }
   },
   plugins: [

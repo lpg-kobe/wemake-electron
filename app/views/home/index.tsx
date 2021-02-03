@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import serialport from 'serialport'
 import { useTranslation, Trans, Translation } from 'react-i18next'
 
 const Home = () => {
@@ -10,12 +9,13 @@ const Home = () => {
   }, [])
 
   function getPorts() {
-    serialport.list().then((ports: any, err: any) => {
-      if (err) {
-        return
-      }
-      setSerialports(ports)
-    })
+    // @TODO serialport data from socket, add socket connect
+    // serialport.list().then((ports: any, err: any) => {
+    //   if (err) {
+    //     return
+    //   }
+    //   setSerialports(ports)
+    // })
   }
 
   return (
@@ -24,11 +24,11 @@ const Home = () => {
       <p>
         <label>{t('serialport')}:</label>
         <select>
-          {
+          {/* {
             serialports && serialports.map((port: any) => <option key={port.pnpId} value={port.pnpId}>
               {port.path}
             </option>)
-          }
+          } */}
         </select>
         <button onClick={getPorts}>refresh</button>
       </p>
