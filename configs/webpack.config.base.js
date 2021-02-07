@@ -12,9 +12,6 @@ const { defineKey } =
   process.env.NODE_ENV === 'production'
     ? readFile2Json(path.join(appRoot, './.env.prod'))
     : readFile2Json(path.join(appRoot, './.env.dev'))
-const keys = ['env']
-const nodeProcess = {}
-Object.entries(process).forEach(([key, value]) => {})
 
 export default {
   externals: [...Object.keys(externals || {})],
@@ -40,7 +37,7 @@ export default {
               // tell electron to find *.node file in directory we set
               rewritePath:
                 process.env.NODE_ENV === 'production'
-                  ? './resources'
+                  ? process.platform === 'darwin' ? './' : './resources'
                   : 'node_modules/@serialport/bindings/build/Release/'
             }
           }

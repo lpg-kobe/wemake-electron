@@ -1,70 +1,57 @@
 /**
- * Build config for development electron renderer process that uses
- * Hot-Module-Replacement
- *
- * https://webpack.js.org/concepts/hot-module-replacement/
- */
+* @desc local dev server from webpack-dev-server
+* @author pika
+*/
 
-import path from 'path'
-import fs from 'fs'
-import webpack from 'webpack'
-import chalk from 'chalk'
-import { merge } from 'webpack-merge'
-import { spawn, execSync } from 'child_process'
-import { TypedCssModulesPlugin } from 'typed-css-modules-webpack-plugin'
-import baseConfig from './webpack.config.base'
-import CheckNodeEnv from '../internals/scripts/CheckNodeEnv'
+'use strict';
+const webpack = require('webpack')
+const htmlWebpackPlugin = require('html-webpack-plugin')
+const devServer = require('webpack-dev-server')
+const { merge } = require('webpack-merge')
+const { readFile2Json } = require('./tool')
+const { TypedCssModulesPlugin } = require('typed-css-modules-webpack-plugin')
+const { dependencies } = require('../app/package.json')
+const path = require('path')
 
-// When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
-// at the dev webpack config is not accidentally run in a production environment
-if (process.env.NODE_ENV === 'production') {
-  CheckNodeEnv('development')
-}
+const appRoot = path.join(__dirname, '..', 'app')
+const { defineKey } =
+  process.env.NODE_ENV === 'production'
+    ? readFile2Json(path.join(appRoot, './.env.prod'))
+    : readFile2Json(path.join(appRoot, './.env.dev'))
 
-const port = process.env.PORT || 1212
-const publicPath = `http://localhost:${port}/dist`
-const dll = path.join(__dirname, '..', 'dll')
-const manifest = path.resolve(dll, 'renderer.json')
-const requiredByDLLConfig = module.parent.filename.includes(
-  'webpack.config.renderer.dev.dll'
-)
+const baseConfig = {
+  externals: [ 
+    ...Object.keys(dependencies || {})
+  ],
 
-/**
- * Warn if the DLL is not built
- */
-if (!requiredByDLLConfig && !(fs.existsSync(dll) && fs.existsSync(manifest))) {
-  console.log(
-    chalk.black.bgYellow.bold(
-      'The DLL files are missing. Sit back while we build them for you with "yarn build-dll"'
-    )
-  )
-  execSync('yarn build-dll')
-}
-
-export default merge(baseConfig, {
-  devtool: 'inline-source-map',
+  devtool: 'source-map',
 
   mode: 'development',
 
-  target: 'electron-renderer',
-
   entry: [
-    // this can config only in development during electron, base in version 80 of chrome
-    'core-js',
-    'regenerator-runtime/runtime',
-    ...(process.env.PLAIN_HMR ? [] : ['react-hot-loader/patch']),
-    `webpack-dev-server/client?http://localhost:${port}/`,
-    'webpack/hot/only-dev-server',
-    require.resolve('../app/index.tsx')
+    path.join(appRoot, './index.tsx')
+    // require.resolve('../app/index.tsx')
   ],
 
   output: {
-    publicPath: `http://localhost:${port}/dist/`,
-    filename: 'renderer.dev.js'
+    path: path.join(appRoot,'./dist'),
+    // publicPath,
+    filename: 'renderer.dev.js',
+    chunkFilename: 'js/[name].render.chunk.js'
   },
 
   module: {
     rules: [
+      {
+        test: /\.(js|jsx|tsx|ts)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            cacheDirectory: true
+          }
+        }
+      },
       {
         test: /\.global\.css$/,
         use: [
@@ -202,32 +189,49 @@ export default merge(baseConfig, {
       {
         test: /\.(?:ico|gif|png|jpg|jpeg|webp)$/,
         use: 'url-loader'
+      },
+      {
+        test: /\.node$/,
+        use: [
+          {
+            loader: 'node-loader',
+            options: {}
+          }
+        ]
       }
     ]
   },
   resolve: {
+    extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
+    modules: [appRoot, 'node_modules'],
     alias: {
-      'react-dom': '@hot-loader/react-dom'
+      '@': appRoot
     }
   },
   plugins: [
-    requiredByDLLConfig
-      ? null
-      : new webpack.DllReferencePlugin({
-          context: path.join(__dirname, '..', 'dll'),
-          manifest: require(manifest),
-          sourceType: 'var'
-        }),
+    // requiredByDLLConfig
+    //   ? null
+    //   : new webpack.DllReferencePlugin({
+    //       context: path.join(__dirname, '..', 'dll'),
+    //       manifest: require(manifest),
+    //       sourceType: 'var'
+    //     }),
 
-    new webpack.HotModuleReplacementPlugin({
-      multiStep: true
-    }),
+    // new webpack.HotModuleReplacementPlugin({
+    //   multiStep: true
+    // }),
+
+    new webpack.DefinePlugin(defineKey),
 
     new TypedCssModulesPlugin({
       globPattern: 'app/**/*.{css,scss,sass}'
     }),
 
-    new webpack.NoEmitOnErrorsPlugin(),
+    // new webpack.NoEmitOnErrorsPlugin(),
+
+    new htmlWebpackPlugin({
+      template: path.join(appRoot, './app.html')
+    }),
 
     /**
      * Create global constants which can be configured at compile time.
@@ -245,54 +249,40 @@ export default merge(baseConfig, {
       NODE_ENV: 'development'
     }),
 
-    new webpack.LoaderOptionsPlugin({
-      debug: true
-    })
-  ],
+    // new webpack.LoaderOptionsPlugin({
+    //   debug: true
+    // })
+  ]
+}
 
-  node: {
-    __dirname: false,
-    __filename: false
-  },
-
-  devServer: {
-    // proxy: [
-    //   {
-    //     context: ['/login', '/api'],
-    //     target: 'http://newlive.ofweek.com/api/web/',
-    //   },
-    // ],
-    port,
-    publicPath,
-    compress: true,
-    noInfo: false,
-    stats: 'errors-only',
-    inline: true,
-    lazy: false,
+const devConfig = merge(baseConfig, {
+    mode: 'development',
+    output: {
+    },
+    devtool: 'source-map',
+    module: {
+    },
+    optimization: {
+    },
+    plugins: [
+        
+    ]
+})
+const compiler = webpack(devConfig)
+const devOption = {
+    open: true,
     hot: true,
-    headers: { 'Access-Control-Allow-Origin': '*' },
-    contentBase: path.join(__dirname, 'dist'),
-    watchOptions: {
-      aggregateTimeout: 300,
-      ignored: /node_modules/,
-      poll: 100
-    },
+    compress: true,
     historyApiFallback: {
-      verbose: true,
-      disableDotRule: false
+        index: 'app.html',
     },
-    // create main process before webpack render page
-    before () {
-      if (process.env.START_HOT) {
-        console.log('Starting Main Process by electron...')
-        spawn('npm', ['run', 'start-main-dev'], {
-          shell: true,
-          env: process.env,
-          stdio: 'inherit'
-        })
-          .on('close', code => process.exit(code))
-          .on('error', spawnError => console.error(spawnError))
-      }
-    }
-  }
+    stats: {
+        colors: true
+    },
+    contentBase: [path.join(__dirname, '../resources'), path.join(appRoot, './dist')],
+    watchContentBase: true
+}
+const Server = new devServer(compiler, devOption)
+Server.listen(8024, 'localhost', () => {
+    console.log(`Server is listen on ${8024}`)
 })

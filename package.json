@@ -10,6 +10,7 @@
     "build-main": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.main.prod.babel.js --colors",
     "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.babel.js --colors",
     "dev": "cross-env START_HOT=1 node -r @babel/register ./internals/scripts/CheckPortInUse.js && cross-env START_HOT=1 yarn start-renderer-dev",
+    "dev-bs": "cross-env START_HOT=1 node -r @babel/register ./internals/scripts/CheckPortInUse.js && cross-env START_HOT=1 && cross-env NODE_ENV=development node configs/webpack.config.web.babel.js",
     "electron-rebuild": "electron-rebuild --parallel --force --types prod,dev,optional --module-dir app",
     "lint": "cross-env NODE_ENV=development eslint . --cache --ext .js,.jsx,.ts,.tsx",
     "lint-fix": "yarn --silent lint --fix",
@@ -73,6 +74,12 @@
           "y": 220,
           "type": "link",
           "path": "/Applications"
+        }
+      ],
+      "extraFiles": [
+        {
+          "from": "node_modules/@serialport/bindings/build/Release",
+          "to": "./Resources"
         }
       ]
     },
@@ -310,6 +317,7 @@
     "electron-updater": "^4.3.4",
     "flv.js": "^1.5.0",
     "history": "^4.7.2",
+    "i18next": "^19.8.6",
     "immutable": "^4.0.0-rc.12",
     "less": "^3.12.2",
     "less-loader": "^7.0.2",
@@ -318,6 +326,7 @@
     "react-dom": "^16.12.0",
     "react-draggable": "^4.4.3",
     "react-hot-loader": "^4.12.21",
+    "react-i18next": "^11.8.5",
     "react-redux": "^7.2.1",
     "react-router-dom": "^5.2.0",
     "react-virtualized": "^9.22.2",
