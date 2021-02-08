@@ -116,10 +116,10 @@ const initWindow = async () => {
   })
 
   /** send close page message to all renderer witch can do sth before close page */
-  mainListen(RENDERER_EVENT.RENDERER_PAGE_CLOSE, (event: any, ...args: any) => {
-    log.silly(`main:listen-${RENDERER_EVENT.RENDERER_PAGE_CLOSE}`, `params:${args}`, 'event:', event)
+  mainListen(RENDERER_EVENT.RENDERER_SEND_CODE, (event: any, ...args: any) => {
+    log.silly(`main:listen-${RENDERER_EVENT.RENDERER_SEND_CODE}`, `params:${args}`, 'event:', event)
     Object.values(totalWindow).forEach((bWindow: any) => {
-      bWindow.webContents.send(RENDERER_EVENT.RENDERER_PAGE_CLOSE, ...args)
+      bWindow.webContents.send(RENDERER_EVENT.RENDERER_SEND_CODE, ...args)
     })
   })
 
@@ -169,7 +169,7 @@ const createWindow = (namespace: string, config: any) => {
   totalWindow[namespace].config = windowConfig
   totalWindow[namespace].loadURL(config.url);
   // open devtool in dev
-  // totalWindow[namespace].webContents.openDevTools({ mode: 'detach' })
+  totalWindow[namespace].webContents.openDevTools({ mode: 'detach' })
 
   // close window by closeNamespace which you need to close
   closeNamespace && totalWindow[closeNamespace].close()

@@ -219,12 +219,18 @@ export function exitFullScreen() {
 }
 
 /**
- * @desc 索引插入元素到输入框，后期考虑更换成rich editor
- * @return {String} value
+ * @desc 图片宽高等比换算机器X轴Y轴坐标
  */
-export function formatInput(inputEle: any, value: any) {
-  const initValue = inputEle.value
-  const focusStart = ~~inputEle.selectionStart
-  const focusEnd = ~~inputEle.selectionEnd
-  return `${initValue.slice(0, focusStart)}${value}${initValue.slice(focusEnd, initValue.length)}`
-}
+export function transImgToMachineSize(size: any, width: number, height: number) {
+  let height_ = height;
+  let width_ = width;
+  if (width_ * size.y >= height_ * size.x && width_ > size.x) {
+    height_ = size.x * height_ / width_;
+    width_ = size.x;
+  }
+  if (height_ * size.x >= width_ * size.y && height_ > size.y) {
+    width_ = size.y * width_ / height_;
+    height_ = size.y;
+  }
+  return { width: width_, height: height_ };
+};

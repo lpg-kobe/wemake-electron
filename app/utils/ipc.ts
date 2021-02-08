@@ -17,7 +17,8 @@ export const MAIN_EVENT = {
 // event name config of renderrer process, name rule as [process_operate_status]
 export const RENDERER_EVENT = {
     RENDERER_LAUNCH_READY: 'RENDERER_LAUNCH_READY', // 渲染进程启动页加载完毕 
-    RENDERER_PAGE_CLOSE: 'RENDERER_PAGE_CLOSE'// 渲染进程页面关闭 
+    RENDERER_PAGE_CLOSE: 'RENDERER_PAGE_CLOSE', // 渲染进程页面关闭 
+    RENDERER_SEND_CODE: 'RENDERER_SEND_CODE' // 渲染进程发送消息 
 }
 
 /**

@@ -1,34 +1,36 @@
-import React ,{useState,useEffect} from 'react';
-import serialport from 'serialport'
+import React, { useState, useEffect } from 'react';
+import { useTranslation, Trans, Translation } from 'react-i18next'
 
 const Home = () => {
-  const [serialports, setSerialports]:any = useState([])
-  useEffect(()=>{
+  const [serialports, setSerialports]: any = useState([])
+  const { t ,i18n} = useTranslation()
+  useEffect(() => {
     getPorts()
-  },[])
+  }, [])
 
-   function getPorts(){
-    serialport.list().then((ports:any,err:any)=>{
-       if(err){
-         return 
-       }
-      setSerialports(ports)
-     })
+  function getPorts() {
+    // @TODO serialport data from socket, add socket connect
+    // serialport.list().then((ports: any, err: any) => {
+    //   if (err) {
+    //     return
+    //   }
+    //   setSerialports(ports)
+    // })
   }
 
   return (
     <div>
       <h1>Wemake</h1>
       <p>
-      <label>serialport:</label>
-		   <select>
-		  {
-			  serialports && serialports.map((port:any)=><option key={port.pnpId} value={port.pnpId}>
-				  {port.path}
-			  </option>)
-		  }
-      </select>
-      <button onClick={getPorts}>refresh</button>
+        <label>{t('serialport')}:</label>
+        <select>
+          {/* {
+            serialports && serialports.map((port: any) => <option key={port.pnpId} value={port.pnpId}>
+              {port.path}
+            </option>)
+          } */}
+        </select>
+        <button onClick={getPorts}>refresh</button>
       </p>
       <div className="Hello">
         <a
