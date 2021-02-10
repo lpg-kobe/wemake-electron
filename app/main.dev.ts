@@ -82,6 +82,7 @@ const showLastWindow = () => {
 /** init app name or tray-menu after app ready */
 const initTool = async () => {
   // 应用设置
+  app.commandLine.appendSwitch('ignore-certificate-errors')
   app.setAboutPanelOptions({
     applicationName: productName,
     applicationVersion: version

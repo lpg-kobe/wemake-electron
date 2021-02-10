@@ -2,13 +2,8 @@
  * @desc system modal during app, base in react-redux and redux-saga
  */
 import immutable from 'immutable';
-// @ts-ignore
-import { SDK_APP_ID } from '@/constants'
 const initialState = {
-  // system table contain all table in route component
-  table: {},
-  // set tableId in order to update after Table change
-  updateTableId: '',
+  serialports: []
 };
 
 type LocationType = {
@@ -21,7 +16,7 @@ type SetUpType = {
 };
 
 export default {
-  namespace: 'system',
+  namespace: 'home',
   state: immutable.fromJS(initialState),
   subscriptions: {
     setup({ history, dispatch }: SetUpType) {

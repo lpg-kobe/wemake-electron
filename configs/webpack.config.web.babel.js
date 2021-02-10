@@ -12,6 +12,7 @@ const { readFile2Json } = require('./tool')
 const { TypedCssModulesPlugin } = require('typed-css-modules-webpack-plugin')
 const { dependencies } = require('../app/package.json')
 const path = require('path')
+const WemakeSocket = require('../app/services/socket/index.ts')
 
 const appRoot = path.join(__dirname, '..', 'app')
 const { defineKey } =
@@ -30,7 +31,6 @@ const baseConfig = {
 
   entry: [
     path.join(appRoot, './index.tsx')
-    // require.resolve('../app/index.tsx')
   ],
 
   output: {
@@ -45,12 +45,12 @@ const baseConfig = {
       {
         test: /\.(js|jsx|tsx|ts)$/,
         exclude: /node_modules/,
-        use: {
+        use: [{
           loader: 'babel-loader',
           options: {
             cacheDirectory: true
           }
-        }
+        }]
       },
       {
         test: /\.global\.css$/,
@@ -217,9 +217,9 @@ const baseConfig = {
     //       sourceType: 'var'
     //     }),
 
-    // new webpack.HotModuleReplacementPlugin({
-    //   multiStep: true
-    // }),
+    new webpack.HotModuleReplacementPlugin({
+      multiStep: true
+    }),
 
     new webpack.DefinePlugin(defineKey),
 
@@ -227,7 +227,7 @@ const baseConfig = {
       globPattern: 'app/**/*.{css,scss,sass}'
     }),
 
-    // new webpack.NoEmitOnErrorsPlugin(),
+    new webpack.NoEmitOnErrorsPlugin(),
 
     new htmlWebpackPlugin({
       template: path.join(appRoot, './app.html')
@@ -249,10 +249,16 @@ const baseConfig = {
       NODE_ENV: 'development'
     }),
 
-    // new webpack.LoaderOptionsPlugin({
-    //   debug: true
-    // })
-  ]
+    new webpack.NamedModulesPlugin(),
+
+    new webpack.LoaderOptionsPlugin({
+      debug: true
+    })
+  ],
+  node: {
+    __dirname: false,
+    __filename: false
+  },
 }
 
 const devConfig = merge(baseConfig, {
@@ -286,3 +292,4 @@ const Server = new devServer(compiler, devOption)
 Server.listen(8024, 'localhost', () => {
     console.log(`Server is listen on ${8024}`)
 })
+new WemakeSocket(Server)
