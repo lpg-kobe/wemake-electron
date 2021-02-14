@@ -1,5 +1,5 @@
-import ensureArray from './app/lib/ensure-array';
-import { parseLine } from './app/lib/gcodeParser';
+import ensureArray from './ensure-array';
+import { parseLine } from './gcodeParser';
 
 const fromPairs = (pairs) => {
     let index = -1;
