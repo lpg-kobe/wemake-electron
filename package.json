@@ -337,7 +337,9 @@
     "socket.io": "^3.1.1",
     "source-map-support": "^0.5.19",
     "tim-js-sdk": "^2.8.0",
-    "trtc-electron-sdk": "^8.2.6"
+    "trtc-electron-sdk": "^8.2.6",
+    "winston": "~3.0.0",
+    "static-eval": "~1.1.1"
   },
   "devEngines": {
     "node": ">=7.x",

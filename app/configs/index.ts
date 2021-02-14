@@ -8,10 +8,14 @@ export const machineList = {
         X: 125,
         Y: 125,
         label: 'X-Laser110'
-    }
+    },
     X200: {
         X: 150,
         Y: 150,
         label: 'X-Laser200'
     }
+};
+
+export const settings = {
+    verbosity: 0
 };
