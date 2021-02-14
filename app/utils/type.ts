@@ -50,3 +50,11 @@ export interface RouteConfigType {
 // 路由配置
 export type RouteConfigsType = Array<RouteConfigType>
 
+// 打印类型配置
+export type PrintModeInfo = {
+    mode: 'bw' | 'greyscale' | 'vector';
+    config: {
+        movementMode: string
+    }
+}
+

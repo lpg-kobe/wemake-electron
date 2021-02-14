@@ -16,7 +16,7 @@ const RouteArrs: RouteConfigsType = [
         app,
         component: () => import('./views/home/index'),
         // @ts-ignore
-        models: () => []
+        models: () => [import('./models/home/index')]
       }),
   }
 ]

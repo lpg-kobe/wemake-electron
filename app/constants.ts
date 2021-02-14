@@ -2,8 +2,6 @@
  * @desc global config during electron
  */
 
-import path from 'path'
-
 type DefaultConfigParam = {
     show?: boolean;
     width?: number;

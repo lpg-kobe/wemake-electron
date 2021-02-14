@@ -31,6 +31,7 @@
     "release",
     "app/main.prod.js",
     "app/renderer.prod.js",
+    "app/services/**/*",
     "app/dist",
     "configs/**/*",
     "*.sass.d.ts",

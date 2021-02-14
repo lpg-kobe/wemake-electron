@@ -1,21 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation, Trans, Translation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import serialport from 'serialport'
+import { connect } from 'dva';
 
-const Home = () => {
-  const [serialports, setSerialports]: any = useState([])
-  const { t ,i18n} = useTranslation()
+const Home = (props: any) => {
+  const { home: { serialports }, system, dispatch } = props
+  // const [serialports, setSerialports]: any = useState([])
+  const { t } = useTranslation()
   useEffect(() => {
     getPorts()
   }, [])
 
   function getPorts() {
+    console.log(system)
     // @TODO serialport data from socket, add socket connect
-    // serialport.list().then((ports: any, err: any) => {
-    //   if (err) {
-    //     return
-    //   }
-    //   setSerialports(ports)
-    // })
+    serialport.list().then((ports: any, err: any) => {
+      if (err) {
+        return
+      }
+      dispatch({
+        type: 'home/save',
+        payload: {
+          serialports: ports
+        }
+      })
+    })
   }
 
   return (
@@ -24,11 +33,11 @@ const Home = () => {
       <p>
         <label>{t('serialport')}:</label>
         <select>
-          {/* {
-            serialports && serialports.map((port: any) => <option key={port.pnpId} value={port.pnpId}>
+          {
+            serialports && serialports.map((port: any) => <option key={Math.random()} value={port.pnpId}>
               {port.path}
             </option>)
-          } */}
+          }
         </select>
         <button onClick={getPorts}>refresh</button>
       </p>
@@ -61,5 +70,7 @@ const Home = () => {
     </div>
   );
 };
-
-export default Home
+export default connect(({ home, system }: any) => ({
+  home: home.toJS(),
+  system: system.toJS()
+}))(Home)
