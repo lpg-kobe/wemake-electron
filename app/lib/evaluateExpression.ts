@@ -3,7 +3,7 @@ import { parse } from 'esprima';
 import evaluate from 'static-eval';
 import logger from './logger';
 
-const log = logger('evaluateExpression');
+//const log = logger('evaluateExpression');
 
 const evaluateExpression = (src, context) => {
     try {

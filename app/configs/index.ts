@@ -17,5 +17,6 @@ export const machineList = {
 };
 
 export const settings = {
-    verbosity: 0
+    verbosity: 0,
+    level: 'silly'
 };

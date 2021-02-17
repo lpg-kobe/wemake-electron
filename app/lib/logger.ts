@@ -1,7 +1,7 @@
 import util from 'util';
 import chalk from 'chalk';
 import winston from 'winston';
-import settings from '../configs/index.ts';
+import { settings }from '../configs/index.ts';
 
 // https://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
 const getStackTrace = () => {
@@ -17,7 +17,7 @@ const { combine, colorize, timestamp, printf } = winston.format;
 // https://github.com/winstonjs/winston/blob/master/README.md#creating-your-own-logger
 const logger = winston.createLogger({
     exitOnError: false,
-    level: settings.winston.level,
+    level: settings.level,
     silent: false,
     transports: [
         new winston.transports.Console({
@@ -42,7 +42,9 @@ const levels = [
     'silly' // 5
 ];
 
-module.exports = (namespace = '') => {
+/*
+export (namespace = '') => {
+// module.exports = (namespace = '') => {
     namespace = String(namespace);
 
     return levels.reduce((acc, level) => {
@@ -57,9 +59,12 @@ module.exports = (namespace = '') => {
         return acc;
     }, {});
 };
+*/
 
-module.exports.logger = logger;
+// module.exports.logger = logger;
+export default logger;
 
+/*
 levels.forEach(level => {
     module.exports[level] = (...args) => {
         if ((settings.verbosity >= VERBOSITY_MAX) && (level !== 'silly')) {
@@ -68,3 +73,4 @@ levels.forEach(level => {
         return logger[level](util.format(...args));
     };
 });
+*/

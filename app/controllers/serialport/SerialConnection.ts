@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import SerialPort from 'serialport';
 import logger from '../../lib/logger';
 
-const log = logger('lib:SerialConnection');
+//const log = logger('lib:SerialConnection');
 const Readline = SerialPort.parsers.Readline;
 
 const defaultSettings = Object.freeze({

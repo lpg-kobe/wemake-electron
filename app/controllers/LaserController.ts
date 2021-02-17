@@ -29,8 +29,6 @@ import {
     CONTROLLER_STATUS_CONNECT_TIME_OUT,     
 } from './constants';
 
-import logger from '../lib/logger';
-const log = logger('controller:Marlin');
 
 class LaserController {
     type = LASER;
@@ -49,10 +47,11 @@ class LaserController {
         },
         close: (err) => {
             this.ready = false;
+            /*
             if (err) {
                 log.warn(`Disconnected from serial port "${this.options.port}":`, err);
             }
-
+            */
             this.close();
         },
         error: (err) => {
@@ -76,7 +75,7 @@ class LaserController {
 
     ready = false;
 
-    status = CONTROLLER_STATUS_INVALID; 
+    controller_status = CONTROLLER_STATUS_INVALID; 
 
     state = {};
 
@@ -122,9 +121,12 @@ class LaserController {
             const now = new Date().getTime();
             if (this.query.type === QUERY_TYPE_POSITION) {
                 this.writeln('?');
-            } else {
+            } 
+            /*
+            else {
                 log.error('Unsupported query type: ', this.query.type);
             }
+            */
             this.query.type = null;
         }
     };
@@ -189,17 +191,17 @@ class LaserController {
             return;
         }
 
-        if (this.status === CONTROLLER_STATUS_INVALID) {
-            this.status = CONTROLLER_STATUS_CONNECTING;
-        }else if (CONTROLLER_STATUS_CONNECTING == this.status && true == this.ready){
-            this.status = CONTROLLER_STATUS_CONNECTED;
+        if (this.controller_status === CONTROLLER_STATUS_INVALID) {
+            this.controller_status = CONTROLLER_STATUS_CONNECTING;
+        }else if (CONTROLLER_STATUS_CONNECTING == this.controller_status && true == this.ready){
+            this.controller_status = CONTROLLER_STATUS_CONNECTED;
             return;
         }
-        if (ONTROLLER_STATUS_CONNECTING == this.status){
+        if (ONTROLLER_STATUS_CONNECTING == this.controller_status) {
             resetConnect();
             AutoConnect();
         }
-    }
+    };
 
     constructor() {
         // Feeder,queue to controll events like feed & next.. 
@@ -211,7 +213,7 @@ class LaserController {
         // this will happend and run dataFilter once you call this.feeder.next()
         this.feeder.on('data', (line = '', context = {}) => {
             if (!this.isOpen()) {
-                log.error(`Serial port "${this.options.port}" is not accessible`);
+                // log.error(`Serial port "${this.options.port}" is not accessible`);
                 return;
             }
 
@@ -224,7 +226,7 @@ class LaserController {
             this.writeln(line, {
                 source: WRITE_SOURCE_FEEDER // set write source to record history of serial, witch contain write source & write line like 'G0 XX YY'
             });
-            log.silly(`> ${line}`);
+            //log.silly(`> ${line}`);
         });
 
         // Sender ,init to load gcode and emit data to this 
@@ -235,25 +237,25 @@ class LaserController {
         });
         this.sender.on('data', (line = '') => {
             if (!this.ready) {
-                log.error(`Serial port "${this.options.port}" is not accessible`);
+                // log.error(`Serial port "${this.options.port}" is not accessible`);
                 return;
             }
 
             if (this.workflow.state !== WORKFLOW_STATE_RUNNING) {
-                log.error(`Unexpected workflow state: ${this.workflow.state}`);
+                // log.error(`Unexpected workflow state: ${this.workflow.state}`);
                 return;
             }
 
             line = String(line).trim();
             if (line.length === 0) {
-                log.warn(`Expected non-empty line: N=${this.sender.state.sent}`);
+                // log.warn(`Expected non-empty line: N=${this.sender.state.sent}`);
                 return;
             }
 
             this.writeln(line, {
                 source: WRITE_SOURCE_SENDER
             });
-            log.silly(`> ${line}`);
+            // log.silly(`> ${line}`);
         });
         this.sender.on('hold', noop);
         this.sender.on('unhold', noop);
@@ -289,7 +291,7 @@ class LaserController {
 
         this.controller.on('data', (res) => {
             if (!this.isOpen()){
-                log.error(`port[${this.curPort}] is closed, try to connect...`);
+                // log.error(`port[${this.curPort}] is closed, try to connect...`);
                 return;
             }
             if (!this.ready){
@@ -299,7 +301,7 @@ class LaserController {
         });
 
         this.controller.on('pos', (res) => {// get position from serialport:read to make sure mechine is ready
-            log.silly(`controller.on('pos'): source=${this.history.writeSource}, line=${JSON.stringify(this.history.writeLine)}, res=${JSON.stringify(res)}`);
+            // log.silly(`controller.on('pos'): source=${this.history.writeSource}, line=${JSON.stringify(this.history.writeLine)}, res=${JSON.stringify(res)}`);
             /*
             if (_.includes([WRITE_SOURCE_CLIENT, WRITE_SOURCE_FEEDER], this.history.writeSource)) {
                 this.emitAll('serialport:read', res.raw);
@@ -307,12 +309,12 @@ class LaserController {
             */
         });
         this.controller.on('ok', (res) => {
-            log.silly(`controller.on('ok'): source=${this.history.writeSource}, line=${JSON.stringify(this.history.writeLine)}, res=${JSON.stringify(res)}`);
+            // log.silly(`controller.on('ok'): source=${this.history.writeSource}, line=${JSON.stringify(this.history.writeLine)}, res=${JSON.stringify(res)}`);
             // Display info to console, if this is from user-input
             if (res) {
                 if (!this.history.writeSource) {
                     //this.emitAll('serialport:read', res.raw);
-                    log.error('"history.writeSource" should NOT be empty');
+                    //log.error('"history.writeSource" should NOT be empty');
                 }
             }
 
@@ -326,7 +328,7 @@ class LaserController {
                 if (this.sender.state.hold) {
                     const { sent, received } = this.sender.state;
                     if (received + 1 >= sent) {
-                        log.debug(`Continue sending G-code: sent=${sent}, received=${received}`);
+                        // log.debug(`Continue sending G-code: sent=${sent}, received=${received}`);
                         this.sender.unhold();
                     }
                 }
@@ -370,7 +372,7 @@ class LaserController {
         });
 
         this.controller.on('others', (res) => {
-            log.error('Can\'t parse result, maybe correct.', res.raw);
+            // log.error('Can\'t parse result, maybe correct.', res.raw);
             if (this.workflow.state === WORKFLOW_STATE_RUNNING) {
                 const { lines, received } = this.sender.state;
                 const line = lines[received] || '';
@@ -416,9 +418,9 @@ class LaserController {
             }
 
             this.issue();            
-            if (now - this.revDataTime > 1000 && CONTROLLER_STATUS_CONNECTING != this.status){// milliseconds
-                log.debug(`port[${this.curPort}] aborted, try to connect...`);
-                this.status = CONTROLLER_STATUS_INVALID; 
+            if (now - this.revDataTime > 1000 && CONTROLLER_STATUS_CONNECTING != this.controller_status){// milliseconds
+                // log.debug(`port[${this.curPort}] aborted, try to connect...`);
+                this.controller_status = CONTROLLER_STATUS_INVALID; 
             }
             this.TryToChangeStatus(now_time);
             // emit ui
@@ -438,7 +440,7 @@ class LaserController {
                     // Extend the sender finish time
                     this.senderFinishTime = now;
                 } else if (timespan > toleranceTime) {
-                    log.silly(`Finished sending G-code: timespan=${timespan}`);
+                    // log.silly(`Finished sending G-code: timespan=${timespan}`);
 
                     this.senderFinishTime = 0;
 
@@ -508,7 +510,7 @@ class LaserController {
 
         // Assertion check
         if (this.serialport && this.serialport.isOpen()) {
-            log.error(`Cannot open serial port "${port}"`);
+            // log.error(`Cannot open serial port "${port}"`);
             return;
         }
 
@@ -614,7 +616,7 @@ class LaserController {
         this.serialport.on('data', this.serialportListener.data);
         this.serialport.open((err) => {
             if (err || !this.serialport.isOpen) {
-                log.error(`Error opening serial port "${port}":`, err);
+                // log.error(`Error opening serial port "${port}":`, err);
                 //this.emitAll('serialport:open', { port: port, err: err });
                 callback(err); // notify error
                 return;
@@ -636,7 +638,7 @@ class LaserController {
                 setTimeout(() => this.writeln('?'));
             }, 1000);
 
-            log.debug(`Connected to serial port "${port}"`);
+            // log.debug(`Connected to serial port "${port}"`);
 
             this.workflow.stop();
 
@@ -659,7 +661,7 @@ class LaserController {
 
         // Assertion check
         if (!this.serialport) {
-            log.error(`Serial port "${port}" is not available`);
+            // log.error(`Serial port "${port}" is not available`);
             return;
         }
 
@@ -673,7 +675,7 @@ class LaserController {
             this.serialport.removeListener('error', this.serialportListener.error);
             this.serialport.close((err) => {
                 if (err) {
-                    log.error(`Error closing serial port "${port}":`, err);
+                    // log.error(`Error closing serial port "${port}":`, err);
                 }
             });
         }
@@ -688,7 +690,7 @@ class LaserController {
     listPort(){
         serialport.list((err, ports) => {
             if (err) {
-                log.error(`fetch port fail: "${err}"`);
+                // log.error(`fetch port fail: "${err}"`);
                 return;
             }
             const availablePorts = ports.map(port => {
@@ -725,7 +727,7 @@ class LaserController {
                 }
 
 
-                log.debug(`Load G-code: name="${this.sender.state.name}", size=${this.sender.state.gcode.length}, total=${this.sender.state.total}`);
+                // log.debug(`Load G-code: name="${this.sender.state.name}", size=${this.sender.state.gcode.length}, total=${this.sender.state.total}`);
 
                 this.workflow.stop();
 
@@ -807,7 +809,7 @@ class LaserController {
         }[cmd];
 
         if (!handler) {
-            log.error(`Unknown command: ${cmd}`);
+            // log.error(`Unknown command: ${cmd}`);
             return;
         }
 
@@ -816,7 +818,7 @@ class LaserController {
 
     writeln(data, context = {}) {
         if (!this.isOpen()) {
-            log.error(`Serial port "${this.options.port}" is not accessible`);
+            // log.error(`Serial port "${this.options.port}" is not accessible`);
             return;
         }
 
