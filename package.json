@@ -305,17 +305,12 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.14.0",
     "@hot-loader/react-dom": "^16.13.0",
-    "@liveqing/liveplayer": "^2.2.0",
     "@reduxjs/toolkit": "^1.4.0",
     "antd": "^4.7.3",
     "connected-react-router": "^6.6.1",
-    "cos-js-sdk-v5": "^1.0.1",
-    "dplayer": "^1.26.0",
     "dva": "^2.4.1",
     "electron-debug": "^3.1.0",
-    "electron-log": "^4.2.4",
     "electron-updater": "^4.3.4",
-    "flv.js": "^1.5.0",
     "history": "^4.7.2",
     "i18next": "^19.8.6",
     "immutable": "^4.0.0-rc.12",
@@ -336,8 +331,7 @@
     "serialport": "8.0.8",
     "socket.io": "^3.1.1",
     "source-map-support": "^0.5.19",
-    "tim-js-sdk": "^2.8.0",
-    "trtc-electron-sdk": "^8.2.6"
+    "winston": "^3.3.3"
   },
   "devEngines": {
     "node": ">=7.x",
