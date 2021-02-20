@@ -16,9 +16,10 @@ import { autoUpdater } from 'electron-updater';
 import { MAIN_EVENT, RENDERER_EVENT, mainListen, mainHandle } from './utils/ipc';
 import { DEFAULT_WINDOW_CONFIG } from './constants'
 import { productName, version } from './package.json'
-import wemakeLogger from './utils/log'
+import logger from './utils/log'
 // import MenuBuilder from './menu';
 
+const wemakeLogger = logger('main process')
 export default class AppUpdater {
   constructor() {
     autoUpdater.logger = wemakeLogger;
@@ -123,7 +124,7 @@ const initWindow = async () => {
    * @param {config} config of new window
    */
   mainHandle(MAIN_EVENT.MAIN_OPEN_PAGE, async ({ sender: { history } }: any, { namespace, ...config }: any) => {
-    wemakeLogger.silly(MAIN_EVENT.MAIN_OPEN_PAGE, history)
+    wemakeLogger.info(MAIN_EVENT.MAIN_OPEN_PAGE, history)
     if (!namespace) {
       throw new Error("can not create new window without namespce, plaease try again with namespace key in your config")
     }
@@ -152,7 +153,6 @@ const initWindow = async () => {
  * @param {Object} config config of window witch you create 
  */
 const createWindow = (namespace: string, config: any) => {
-  wemakeLogger.silly('main create window', config)
   const { closeNamespace } = config
   const windowConfig = {
     icon: getAssetPath('/icons/iconX256.png'),
