@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next'
 import serialport from 'serialport'
 import { connect } from 'dva';
+import logger from "../../utils/log"
 
+const log = logger('home page')
 const Home = (props: any) => {
   const { home: { serialports }, system, dispatch } = props
   // const [serialports, setSerialports]: any = useState([])
   const { t } = useTranslation()
   useEffect(() => {
+    log.info('render home page', { params: {} })
     getPorts()
   }, [])
 

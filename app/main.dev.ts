@@ -16,16 +16,13 @@ import { autoUpdater } from 'electron-updater';
 import { MAIN_EVENT, RENDERER_EVENT, mainListen, mainHandle } from './utils/ipc';
 import { DEFAULT_WINDOW_CONFIG } from './constants'
 import { productName, version } from './package.json'
-import log from 'electron-log';
+import logger from './utils/log'
 // import MenuBuilder from './menu';
 
-// add log.info to log.log because log level default set to 'warn'
-log.transports.console.level = 'silly'
-
+const wemakeLogger = logger('main process')
 export default class AppUpdater {
   constructor() {
-    log.transports.file.level = 'info';
-    autoUpdater.logger = log;
+    autoUpdater.logger = wemakeLogger;
     autoUpdater.checkForUpdatesAndNotify();
   }
 }
@@ -44,8 +41,6 @@ const getAssetPath = (...paths: string[]): string => {
 };
 
 if (process.env.NODE_ENV === 'production') {
-  // close console of log in production
-  log.transports.console.level = false
   const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();
 }
@@ -118,7 +113,6 @@ const initWindow = async () => {
 
   /** send close page message to all renderer witch can do sth before close page */
   mainListen(RENDERER_EVENT.RENDERER_SEND_CODE, (event: any, ...args: any) => {
-    log.silly(`main:listen-${RENDERER_EVENT.RENDERER_SEND_CODE}`, `params:${args}`, 'event:', event)
     Object.values(totalWindow).forEach((bWindow: any) => {
       bWindow.webContents.send(RENDERER_EVENT.RENDERER_SEND_CODE, ...args)
     })
@@ -130,7 +124,7 @@ const initWindow = async () => {
    * @param {config} config of new window
    */
   mainHandle(MAIN_EVENT.MAIN_OPEN_PAGE, async ({ sender: { history } }: any, { namespace, ...config }: any) => {
-    log.silly(history, MAIN_EVENT.MAIN_OPEN_PAGE, '===>', config)
+    wemakeLogger.info(MAIN_EVENT.MAIN_OPEN_PAGE, history)
     if (!namespace) {
       throw new Error("can not create new window without namespce, plaease try again with namespace key in your config")
     }
