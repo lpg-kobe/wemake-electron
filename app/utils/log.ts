@@ -19,7 +19,7 @@ const {
 } = winston
 
 const wemakeLog: any = createLogger({
-  level: 'info',
+  level: 'debug',
   levels,
   exitOnError: false, // winston will not exit if handled exceptions
   format: combine(

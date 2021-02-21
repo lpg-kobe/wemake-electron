@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events';
 import SerialPort from 'serialport';
-import logger from '../../lib/logger';
+import logger from '../../utils/log';
 
-//const log = logger('lib:SerialConnection');
+const log = logger('SerialConnection');
 const Readline = SerialPort.parsers.Readline;
 
 const defaultSettings = Object.freeze({
@@ -55,7 +55,8 @@ class SerialConnection extends EventEmitter {
             this.writeFilter = writeFilter;
         }
 
-        const settings = Object.assign({}, ...options, defaultSettings);
+        //const settings = Object.assign({}, ...options, ...defaultSettings) || { };
+        const settings = {...options, ...defaultSettings}
 
         Object.defineProperties(this, {
             settings: {
@@ -70,7 +71,7 @@ class SerialConnection extends EventEmitter {
         return toIdent(this.settings);
     }
 
-    get isOpen() {
+    isOpen() {
         return this.port && this.port.isOpen;
     }
 
@@ -115,6 +116,14 @@ class SerialConnection extends EventEmitter {
         this.port.close(callback);
         this.port = null;
         this.parser = null;
+    }
+
+    list(callback) {
+        if (!this.port) {
+            return;
+        }
+
+        this.port.list(callback);
     }
 
     write(data, context) {

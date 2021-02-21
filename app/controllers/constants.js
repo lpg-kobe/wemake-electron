@@ -5,6 +5,7 @@ export const QUERY_TYPE_POSITION = 'position';
 
 export const WRITE_SOURCE_FEEDER = 'feeder';
 export const WRITE_SOURCE_SENDER = 'sender';
+export const WRITE_SOURCE_QUERY = 'query';
 
 export const CONTROLLER_STATUS_INVALID = 0;
 export const CONTROLLER_STATUS_INSTALL_DRIVERING = 1;

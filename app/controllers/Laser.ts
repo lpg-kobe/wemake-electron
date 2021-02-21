@@ -230,6 +230,7 @@ class Laser extends events.EventEmitter {
         const result = this.parser.parse(data) || {};
         const { type, payload } = result;
 
+        this.emit('data', payload);
         if (type === LaserLineParserResultStart) {
             this.emit('start', payload);
         } else if (type === LaserLineParserResultPosition) {
