@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next'
 import serialport from 'serialport'
 import { connect } from 'dva';
+import { Button, Select } from 'antd'
 import logger from "../../utils/log"
+import FileReader from "../../components/fileReader"
 
 const log = logger('home page')
-const Home = (props: any) => {
-  const { home: { serialports }, system, dispatch } = props
-  // const [serialports, setSerialports]: any = useState([])
+const Home = () => {
+  const [serialports, setSerialports]: any = useState([])
   const { t } = useTranslation()
   useEffect(() => {
     log.info('render home page', { params: {} })
@@ -15,61 +16,28 @@ const Home = (props: any) => {
   }, [])
 
   function getPorts() {
-    console.log(system)
     // @TODO serialport data from socket, add socket connect
     serialport.list().then((ports: any, err: any) => {
       if (err) {
         return
       }
-      dispatch({
-        type: 'home/save',
-        payload: {
-          serialports: ports
-        }
-      })
+      setSerialports(ports)
     })
   }
 
   return (
     <div>
       <h1>Wemake</h1>
-      <p>
-        <label>{t('serialport')}:</label>
-        <select>
-          {
-            serialports && serialports.map((port: any) => <option key={Math.random()} value={port.pnpId}>
-              {port.path}
-            </option>)
-          }
-        </select>
-        <button onClick={getPorts}>refresh</button>
-      </p>
-      <div className="Hello">
-        <a
-          href="https://electron-react-boilerplate.js.org/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="books">
-              📚
-            </span>
-            Read our docs
-          </button>
-        </a>
-        <a
-          href="https://github.com/sponsors/electron-react-boilerplate"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="books">
-              🙏
-            </span>
-            Donate
-          </button>
-        </a>
-      </div>
+      <label>{t('serialport')}:</label>
+      <Select value={0}>
+        {
+          serialports && serialports.map((port: any) => <Select.Option key={Math.random()} value={port.pnpId}>
+            {port.path}
+          </Select.Option>)
+        }
+      </Select>
+      <Button onClick={getPorts} type="primary">refresh</Button>
+      <FileReader />
     </div>
   );
 };
