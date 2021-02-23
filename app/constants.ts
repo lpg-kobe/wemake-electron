@@ -24,6 +24,8 @@ type DefaultConfigParam = {
 export const SDK_APP_ID: any = process.env.sdkAppId;
 export const API_HOST: any = process.env.apiHost;
 export const FACE_URL: any = process.env.faceUrl;
+export const NODE_ENV: any = process.env.NODE_ENV;
+export const RESOURCES_PATH: any = process.resourcesPath;
 
 // 默认打开的窗口配置
 export const DEFAULT_WINDOW_CONFIG: DefaultConfigParam = {
