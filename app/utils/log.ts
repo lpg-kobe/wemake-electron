@@ -1,15 +1,14 @@
-
 /**
- * @desc main logger during app during running,base on winston
+ * @desc main logger during app running,base on winston
  * @author pika
  */
 
 const winston = require('winston')
 const util = require('util')
 const chalk = require('chalk')
-const { NODE_ENV } = require('../constants')
+const { NODE_ENV, RESOURCES_PATH } = require('../constants')
 const levels = winston.config.npm.levels
-const logFolder = NODE_ENV === 'production' ? 'resources/log' : 'release/log'
+const logFolder = NODE_ENV === 'production' ? `${RESOURCES_PATH}/log` : 'release/log'
 
 require('winston-daily-rotate-file')
 
@@ -29,7 +28,7 @@ const wemakeLog: any = createLogger({
     label({ label: 'wemake' }),
     timestamp(),
     splat(),
-    printf(({ message, level, label, timestamp }: any) => `${label}:${timestamp} ${level} ==== ${message}`)
+    printf(({ message, level, label, timestamp }: any) => `${label}:${new Date(timestamp)} ${level} ==== ${message}`)
   ),
   transports: [
     // log in console of chrome
@@ -42,8 +41,8 @@ const wemakeLog: any = createLogger({
       filename: `${logFolder}/wemake-%DATE%.log`,
       datePattern: 'YYYY-MM-DD-HH',
       zippedArchive: false,
-      maxSize: '20m',
-      maxFiles: '14d'
+      maxSize: '2m',
+      maxFiles: '7d'
     })
   ],
   // Handling Uncaught Exceptions with winston
@@ -68,7 +67,7 @@ class ApiTransport extends Transport {
 
 const levelArray: Array<any> = Object.keys(levels)
 const logFun: any = (namespace?: string) => levelArray.reduce((prev, level) => {
-  prev[level] = (...args: any) => wemakeLog[level](`${chalk.cyan(namespace)} ### ${util.format(...args)}`)
+  prev[level] = (desc: string, ...args: any) => wemakeLog[level](`${chalk.cyan(namespace)} ### ${chalk.red(desc)} ${util.format(...args)}`)
   return prev
 }, {})
 
