@@ -176,7 +176,7 @@ class LaserController {
         // this will happend and run dataFilter once you call this.feeder.next()
         this.feeder.on('data', (line = '', context = {}) => {
             if (!this.isOpen()) {
-                log.error(`Serial port "${this.options.port}" is not accessible`);
+                log.error(`Serial port is not accessible`);
                 return;
             }
 
@@ -269,12 +269,16 @@ class LaserController {
 
         this.controller.on('pos', (res) => {// get position from serialport:read to make sure mechine is ready
             log.silly(`controller.on('pos'): source=${this.history.writeSource}, line=${JSON.stringify(this.history.writeLine)}, res=${JSON.stringify(res)}`);
+            /*
             if (_.includes([WRITE_SOURCE_CLIENT, WRITE_SOURCE_FEEDER], this.history.writeSource)) {
                 this.emitAll('serialport:read', res.raw);
             }
+            */
         });
         this.controller.on('ok', (res) => {
             log.silly(`controller.on('ok'): source=${this.history.writeSource}, line=${JSON.stringify(this.history.writeLine)}, res=${JSON.stringify(res)}`);
+            this.controller_status = CONTROLLER_STATUS_CONNECTED;
+            this.ready = true;
             // Display info to console, if this is from user-input
             if (res) {
                 if (!this.history.writeSource) {
@@ -377,9 +381,10 @@ class LaserController {
                 //this.emitAll('Laser:state', this.state);
             }
 
-            this.query.issue();            
-            if (now - this.revDataTime > 500 && CONTROLLER_STATUS_CONNECTING !== this.controller_status){// milliseconds
-                this.controller_status = CONTROLLER_STATUS_INVALID; 
+            this.writeln('?');
+            if (now - this.revDataTime > 2000 && CONTROLLER_STATUS_CONNECTING !== this.controller_status){// milliseconds
+                log.info('connect status:', this.controller_status, '-> 0');
+                this.controller_status = CONTROLLER_STATUS_INVALID;
             }
             this.tryToChangeStatus(now);
             // emit ui
@@ -408,7 +413,8 @@ class LaserController {
                 }
             }
         }, 250);
-    this.showLogTimer = setInterval(() => {
+        
+        this.showLogTimer = setInterval(() => {
             log.info('connect status:', this.controller_status, ', ready:', this.ready);
         }, 60000);
     }
@@ -656,25 +662,11 @@ class LaserController {
     listPort(){
         serialport.list().then((ports, err) => {
             if (err){
+                log.error('list port fail:', err);
                 return;
             }
             this.allPorts = ports;
         }
-        /*
-        serialport.list((err, ports) => {
-            if (err) {
-                // log.error(`fetch port fail: "${err}"`);
-                return;
-            }
-            const availablePorts = ports.map(port => {
-                return {
-                    port: port.comName,
-                    manuFacturer: port.manuFacture
-                };
-            });
-            this.allPorts = availablePorts;
-        });
-        */
         );}
 
     autoConnect(){
@@ -682,22 +674,23 @@ class LaserController {
             this.listPort();
             this.curPortIndex = 0;
         }
-        //this.open(this.allPorts[this.curPortIndex]);
         if (0 !== this.allPorts.length){
             this.open(this.allPorts[this.curPortIndex].path);
+            this.curPort = this.allPorts[this.curPortIndex].path;
             this.curPortIndex ++;
         }
     }
     
     resetConnect(){
         if (null !== this.serialport){
+            this.close();
             this.serialport = null; 
         }
         this.ready = false;
     }
 
     tryToChangeStatus(now){
-        if (now - this.lastOpenTime <= 500)
+        if (0 !== this.lastOpenTime && now - this.lastOpenTime <= 1000)
         {
             return;
         }
@@ -822,7 +815,7 @@ class LaserController {
 
     writeln(data, context = {}) {
         if (!this.isOpen()) {
-            log.error(`Serial port "${this.options.port}" is not accessible`);
+            log.debug(`Serial port "${this.curPort}" is not accessible`);
             return;
         }
 

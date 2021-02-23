@@ -17,6 +17,7 @@ const Home = (props: any) => {
   function getPorts() {
     console.log(system)
     // @TODO serialport data from socket, add socket connect
+    /*
     serialport.list().then((ports: any, err: any) => {
       if (err) {
         return
@@ -28,6 +29,7 @@ const Home = (props: any) => {
         }
       })
     })
+    */
   }
 
   return (

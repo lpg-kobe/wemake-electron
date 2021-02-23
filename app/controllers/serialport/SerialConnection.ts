@@ -131,7 +131,6 @@ class SerialConnection extends EventEmitter {
             return;
         }
         data = this.writeFilter(data, context);
-
         this.port.write(data);
     }
 }

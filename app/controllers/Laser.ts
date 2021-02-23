@@ -7,7 +7,8 @@ import set from 'lodash/set';
 import events from 'events';
 import semver from 'semver';
 import { HEAD_TYPE_3DP, HEAD_TYPE_LASER, HEAD_TYPE_CNC } from './constants';
-import log from '../../../app/lib/log';
+import logger from '../utils/log';
+const log = logger('Laser');
 
 // http://stackoverflow.com/questions/10454518/javascript-how-to-retrieve-the-number-of-decimals-of-a-string-number
 function decimalPlaces(num) {
@@ -46,7 +47,7 @@ class LaserLineParserResultStart {
 class LaserLineParserResultPosition {
     // <Idle,MPos:0.000,0.000,0.000,WPos:0.000,0.000,0.000>  
     static parse(line) {
-        const r = line.match(/^\<Idle/i);
+        const r = line.match(/^\<Alarm/i);
         if (!r) {
             return null;
         }
@@ -227,6 +228,7 @@ class Laser extends events.EventEmitter {
 
         this.emit('raw', { raw: data });
 
+        const now1 = new Date().getTime();
         const result = this.parser.parse(data) || {};
         const { type, payload } = result;
 
@@ -255,6 +257,7 @@ class Laser extends events.EventEmitter {
         } else if (data.length > 0) {
             this.emit('others', payload);
         }
+        const now2 = new Date().getTime();
     }
 
     getPosition(state = this.state) {
