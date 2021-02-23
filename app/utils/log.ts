@@ -19,13 +19,13 @@ const {
     createLogger
 } = winston
 
-const ofweekLog: any = createLogger({
+const wemakeLog: any = createLogger({
     level: 'info',
     levels,
     exitOnError: false, // winston will not exit if handled exceptions
     format: combine(
         colorize(),
-        label({ label: 'OFweek' }),
+        label({ label: 'wemake' }),
         timestamp(),
         splat(),
         printf(({ message, level, label, timestamp }: any) => `${label}:${new Date(timestamp)} ${level} ==== ${message}`)
@@ -38,7 +38,7 @@ const ofweekLog: any = createLogger({
 
         // split file daily and save width limit size
         new transports.DailyRotateFile({
-            filename: `${logFolder}/ofweek-%DATE%.log`,
+            filename: `${logFolder}/wemake-%DATE%.log`,
             datePattern: 'YYYY-MM-DD-HH',
             zippedArchive: false,
             maxSize: '2m',
@@ -67,7 +67,7 @@ class ApiTransport extends Transport {
 
 const levelArray: Array<any> = Object.keys(levels)
 const logFun: any = (namespace?: string) => levelArray.reduce((prev, level) => {
-    prev[level] = (desc: string, ...args: any) => ofweekLog[level](`${chalk.cyan(namespace)} ### ${chalk.red(desc)} ${util.format(...args)}`)
+    prev[level] = (desc: string, ...args: any) => wemakeLog[level](`${chalk.cyan(namespace)} ### ${chalk.red(desc)} ${util.format(...args)}`)
     return prev
 }, {})
 
