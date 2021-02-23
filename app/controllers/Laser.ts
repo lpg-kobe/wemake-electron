@@ -47,7 +47,7 @@ class LaserLineParserResultStart {
 class LaserLineParserResultPosition {
     // <Idle,MPos:0.000,0.000,0.000,WPos:0.000,0.000,0.000>  
     static parse(line) {
-        const r = line.match(/^\<Alarm/i);
+        const r = line.match(/^\<Alarm|^\<Idle|^\<Run|^\<Hold|^\<Home|^\<Check|^\<Door/i);
         if (!r) {
             return null;
         }
