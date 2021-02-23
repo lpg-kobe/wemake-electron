@@ -12,7 +12,7 @@ const DEFAULT_TEXT_CONFIG = {
   optimizePath: false,
   fillEnabled: DEFAULT_FILL_ENABLED,
   fillDensity: DEFAULT_FILL_DENSITY,
-  text: 'Snapmaker',
+  text: 'Xmake',
   size: 24,
   font: 'Georgia',
   lineHeight: 1.5,

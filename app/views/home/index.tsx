@@ -17,12 +17,14 @@ const Home = () => {
 
   function getPorts() {
     // @TODO serialport data from socket, add socket connect
+    /*
     serialport.list().then((ports: any, err: any) => {
       if (err) {
         return
       }
       setSerialports(ports)
     })
+    */
   }
 
   return (
