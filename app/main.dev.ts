@@ -19,7 +19,7 @@ import { productName, version } from './package.json'
 import logger from './utils/log'
 // import MenuBuilder from './menu';
 
-const wemakeLogger = logger('main process')
+const wemakeLogger = logger('______Main Process______')
 export default class AppUpdater {
   constructor() {
     autoUpdater.logger = wemakeLogger;

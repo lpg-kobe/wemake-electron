@@ -7,7 +7,9 @@
 const winston = require('winston')
 const util = require('util')
 const chalk = require('chalk')
+const { NODE_ENV } = require('../constants')
 const levels = winston.config.npm.levels
+const logFolder = NODE_ENV === 'production' ? 'resources/log' : 'release/log'
 
 require('winston-daily-rotate-file')
 
@@ -37,7 +39,7 @@ const wemakeLog: any = createLogger({
 
     // split file daily and save width limit size
     new transports.DailyRotateFile({
-      filename: 'release/log/wemake-%DATE%.log',
+      filename: `${logFolder}/wemake-%DATE%.log`,
       datePattern: 'YYYY-MM-DD-HH',
       zippedArchive: false,
       maxSize: '20m',
@@ -46,7 +48,7 @@ const wemakeLog: any = createLogger({
   ],
   // Handling Uncaught Exceptions with winston
   exceptionHandlers: [
-    new transports.File({ filename: 'release/log/exceptions.log' })
+    new transports.File({ filename: `${logFolder}/exceptions.log` })
   ]
 })
 

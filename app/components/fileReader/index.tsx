@@ -12,7 +12,7 @@ import sharp from 'sharp'
 import AModal from '../modal'
 import logger from '../../utils/log'
 
-const wemakeLogger = logger('File Reader')
+const wemakeLogger = logger('______File Reader______')
 
 const FileReader = () => {
   const { t } = useTranslation()
@@ -20,8 +20,6 @@ const FileReader = () => {
   const [files, setFiles]: any = useState([])
 
   function handleSelectFile() {
-    wemakeLogger.info('Select Img')
-
     const imgFolder = path.resolve(__dirname, 'release/cache')
     const fileReg = ['jpeg', 'png', 'jpg']
     fs.ensureDir(imgFolder, (err) => {
