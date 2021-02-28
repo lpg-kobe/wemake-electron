@@ -65,8 +65,8 @@ export const DEFAULT_WINDOW_SIZE = {
         width: 700,
         height: 450
     },
-    // 登录窗口
-    LOGIN: {
+    // 初始化窗口
+    INIT: {
         width: 740,
         height: 406
     }

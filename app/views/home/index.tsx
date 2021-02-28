@@ -1,44 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next'
-import serialport from 'serialport'
+import React from 'react';
 import { connect } from 'dva';
-import { Button, Select } from 'antd'
 import logger from "../../utils/log"
-import FileReader from "../../components/fileReader"
+import CommonFooter from '../../components/layout/footer'
+import PortBash from './components/portBash'
+import ToolTips from './components/toolTips'
+import RenderPanel from './components/renderPanel'
+import ControllPanel from './components/controllPanel'
 
-const log = logger('home page')
+const wemakeLog = logger('______Home Page______')
 const Home = () => {
-  const [serialports, setSerialports]: any = useState([])
-  const { t } = useTranslation()
-  useEffect(() => {
-    log.info('render home page', { params: {} })
-    getPorts()
-  }, [])
-
-  function getPorts() {
-    // @TODO serialport data from socket, add socket connect
-    serialport.list().then((ports: any, err: any) => {
-      if (err) {
-        return
-      }
-      setSerialports(ports)
-    })
-  }
 
   return (
-    <div>
-      <h1>Wemake</h1>
-      <label>{t('serialport')}:</label>
-      <Select value={0}>
-        {
-          serialports && serialports.map((port: any) => <Select.Option key={Math.random()} value={port.pnpId}>
-            {port.path}
-          </Select.Option>)
-        }
-      </Select>
-      <Button onClick={getPorts} type="primary">refresh</Button>
-      <FileReader />
-    </div>
+    <>
+      <section className="home-page-container flex">
+        <div className="home-page-container-l">
+          <PortBash />
+        </div>
+        <div className="home-page-container-r flex">
+          <div className="fix-top">
+            <ToolTips />
+          </div>
+          <div className="flex-bottom flex">
+            <div className="bottom-l" style={{ background: `#${Math.floor(Math.random() * 16777215).toString(16)}` }}> <RenderPanel /></div>
+            <div className="bottom-r">  <ControllPanel /></div>
+          </div>
+        </div>
+      </section>
+      <CommonFooter />
+    </>
+
   );
 };
 export default connect(({ home, system }: any) => ({

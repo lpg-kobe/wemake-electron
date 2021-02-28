@@ -9,7 +9,19 @@ import { RouteConfigsType } from './utils/type'
 const RouteArrs: RouteConfigsType = [
   {
     path: '/',
-    pathname: 'Home',
+    pathname: '启动连接',
+    component: (app: any) =>
+      dynamic({
+        // @ts-ignore
+        app,
+        component: () => import('./views/init/index'),
+        // @ts-ignore
+        models: () => []
+      }),
+  },
+  {
+    path: '/home',
+    pathname: '打印首页',
     component: (app: any) =>
       dynamic({
         // @ts-ignore

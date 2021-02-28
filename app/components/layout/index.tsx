@@ -2,6 +2,7 @@ import React, { ReactNode, Fragment } from 'react';
 import { connect } from 'dva';
 import { ConfigProvider } from 'antd'
 import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
+// import CommonFooter from './footer'
 import zhCN from 'antd/lib/locale/zh_CN';
 
 type PropsType = {
