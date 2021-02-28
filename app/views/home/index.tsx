@@ -9,7 +9,6 @@ import ControllPanel from './components/controllPanel'
 
 const wemakeLog = logger('______Home Page______')
 const Home = () => {
-
   return (
     <>
       <section className="home-page-container flex">

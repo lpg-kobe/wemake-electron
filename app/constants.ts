@@ -34,7 +34,7 @@ export const DEFAULT_WINDOW_CONFIG: DefaultConfigParam = {
     hasShadow: true,
     maximizable: true,
     minimizable: true,
-    resizable: false,
+    resizable: true,
     // titleBarStyle: 'hidden',
     // transparent: true,
     // frame: false,
