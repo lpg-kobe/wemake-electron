@@ -20,7 +20,8 @@ const imgPreffix = 'data:image/png;base64,'
 const fileReg = ['jpeg', 'png', 'jpg']
 const wemakeLogger = logger('______File Reader______')
 
-const FileReader = () => {
+const FileReader = (props: any) => {
+  const { options } = props
   const { t } = useTranslation()
   const fileRef: any = useRef(null)
   const [visible, setVisible]: any = useState(false)
@@ -64,8 +65,10 @@ const FileReader = () => {
     })
   }
 
+  const TriggerDom = options.trigger ? React.cloneElement(options.trigger, { onClick: handleShowFiles }) : <Button onClick={handleShowFiles}>{t('selectImg')}</Button>
+
   return <>
-    <Button onClick={handleShowFiles}>{t('selectImg')}</Button>
+    {TriggerDom}
     <input type="file" accept="image/png, image/jpeg, image/jpg" hidden ref={fileRef} onChange={handleFileChange} />
     <AModal footer={null} visible={visible} width={520} onCancel={() => { setFiles([]); setVisible(false) }} className="img-card-modal">
       <ul>

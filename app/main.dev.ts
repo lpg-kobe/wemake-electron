@@ -14,7 +14,7 @@ import path from 'path';
 import { app, BrowserWindow, Menu, Tray, protocol } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import { MAIN_EVENT, RENDERER_EVENT, mainListen, mainHandle } from './utils/ipc';
-import { DEFAULT_WINDOW_CONFIG } from './constants'
+import { DEFAULT_WINDOW_CONFIG, DEFAULT_WINDOW_SIZE } from './constants'
 import { productName, version } from './package.json'
 import logger from './utils/log'
 // import MenuBuilder from './menu';
@@ -27,7 +27,7 @@ export default class AppUpdater {
   }
 }
 
-let mainWindowKey: any = null;
+let mainWindowKey: any = 'initWindow';
 // tray of app
 let tray: any = null;
 // manage all window of opened
@@ -108,11 +108,13 @@ const initWindow = async () => {
 
   createWindow(mainWindowKey, {
     maximizable: false,
-    url: `file://${__dirname}/app.html`
+    url: `file://${__dirname}/app.html`,
+    ...DEFAULT_WINDOW_SIZE.INIT
   })
 
   /** send close page message to all renderer witch can do sth before close page */
   mainListen(RENDERER_EVENT.RENDERER_SEND_CODE, (event: any, ...args: any) => {
+    wemakeLogger.info(`${RENDERER_EVENT.RENDERER_SEND_CODE}:`, args)
     Object.values(totalWindow).forEach((bWindow: any) => {
       bWindow.webContents.send(RENDERER_EVENT.RENDERER_SEND_CODE, ...args)
     })
@@ -124,7 +126,7 @@ const initWindow = async () => {
    * @param {config} config of new window
    */
   mainHandle(MAIN_EVENT.MAIN_OPEN_PAGE, async ({ sender: { history } }: any, { namespace, ...config }: any) => {
-    wemakeLogger.info(MAIN_EVENT.MAIN_OPEN_PAGE, history)
+    wemakeLogger.info(`${MAIN_EVENT.MAIN_OPEN_PAGE}:`, config)
     if (!namespace) {
       throw new Error("can not create new window without namespce, plaease try again with namespace key in your config")
     }
@@ -134,10 +136,6 @@ const initWindow = async () => {
       createWindow(namespace, config)
     }
   })
-
-  // mainHandle(MAIN_EVENT.MAIN_LIST_SERIALPORT,async()=>{
-  //     return await serialport.list()
-  // })
 
   // const menuBuilder = new MenuBuilder(mainWindow);
   // menuBuilder.buildMenu();
@@ -164,11 +162,12 @@ const createWindow = (namespace: string, config: any) => {
   totalWindow[namespace].config = windowConfig
   totalWindow[namespace].loadURL(config.url);
   // open devtool in dev
-  if (process.env.NODE_ENV === 'development') {
-    totalWindow[namespace].webContents.openDevTools({ mode: 'detach' })
-  }
+  // totalWindow[namespace].webContents.openDevTools({ mode: 'detach' })
+
   // close window by closeNamespace which you need to close
-  closeNamespace && totalWindow[closeNamespace].close()
+  if (closeNamespace && totalWindow[closeNamespace]) {
+    totalWindow[closeNamespace].close()
+  }
 
   // 监听窗口关闭
   totalWindow[namespace].on('closed', () => {
