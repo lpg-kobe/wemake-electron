@@ -1,44 +1,69 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next'
 import { Button, Select, Tag, Divider, Steps } from 'antd'
-import { exec, execFile } from 'child_process'
+import { exec } from 'child_process'
 import path from 'path'
 import logger from "../../utils/log"
 import { rendererInvoke, MAIN_EVENT } from '../../utils/ipc';
-import { judgeRouterUrl } from '../../utils/tool';
+import { judgeRouterUrl, loopToInterval } from '../../utils/tool';
 import { DEFAULT_WINDOW_SIZE, NODE_ENV, RESOURCES_PATH } from '../../constants';
 
 const wemakeLog = logger('______Init Page______')
 const Init = (props: any) => {
+
   const [serialports, setSerialports]: any = useState([])
   const [step, setStep]: any = useState(0)
+
   const { t } = useTranslation()
+
+  const isMac = process.platform === 'darwin'
+  const command = isMac ? 'ls /System/Library/Extensions' : 'driverquery'
+  const driverName = isMac ? 'mac-os-x-driver' : 'setup-driver'
 
   useEffect(() => {
     // check driver if exist
-    const isMac = process.platform === 'darwin'
-    const command = isMac ? 'ls /System/Library/Extensions' : 'driverquery'
-    const driverName = isMac ? 'mac-os-x-driver' : 'setup-driver'
     exec(command, (error, stdout) => {
       if (error) {
         wemakeLog.info(`fail by node command exec:`, error)
         return
       }
       const isInstalled = stdout.includes(driverName)
-      const driverPath = NODE_ENV === 'production' ? path.join(RESOURCES_PATH, '/resources/cache') : path.join(__dirname, '../', 'resources/node.pkg')
+      const isProduction = NODE_ENV === 'production'
+      const driverPath = isProduction ? path.join(RESOURCES_PATH, '/cache') : path.join(__dirname, '../', 'resources')
+      const openCommand = isMac ? `open ${path.join(driverPath, '/driver.pkg')}` : `${path.join(driverPath, '/driver.exe')}`
       if (isInstalled) {
         setStep(step + 1)
       } else {
-        execFile(driverPath, (error, stdout) => {
+        exec(openCommand, (error) => {
           if (error) {
             wemakeLog.info(`fail by node command execFile:`, error)
             return
           }
-          console.log(stdout)
+          // loop to check if installed after open file of driver
+          let timer: any = null
+          timer = loopToInterval(checkDriver, timer, 3 * 1000)
         })
       }
     })
   }, [])
+
+  function checkDriver() {
+    return new Promise((resolve) => {
+      exec(command, (error, stdout) => {
+        if (error) {
+          wemakeLog.info(`fail by loop to node command exec:`, error)
+          resolve(false)
+          return
+        }
+        if (stdout.includes(driverName)) {
+          setStep(step + 1)
+          resolve(false)
+        } else {
+          resolve(true)
+        }
+      })
+    })
+  }
 
   // rendererInvoke(MAIN_EVENT.MAIN_OPEN_PAGE, {
   //   ...DEFAULT_WINDOW_SIZE.MAIN,
