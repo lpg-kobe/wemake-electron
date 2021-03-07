@@ -107,7 +107,6 @@ const initWindow = async () => {
   }
 
   createWindow(mainWindowKey, {
-    maximizable: false,
     url: `file://${__dirname}/app.html`,
     ...DEFAULT_WINDOW_SIZE.INIT
   })

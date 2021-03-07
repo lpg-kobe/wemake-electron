@@ -1,19 +1,17 @@
 import _ from 'lodash';
-import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
 import noop from 'lodash/noop';
-import semver from 'semver';
 import SerialConnection from './serialport/SerialConnection';
 import interpret from '../utils/math/interpret';
 import Feeder from './ipc/Feeder';
 import Sender, { SP_TYPE_SEND_RESPONSE } from './ipc/Sender';
+import { EventEmitter } from 'events';
 import Workflow, {
     WORKFLOW_STATE_PAUSED,
     WORKFLOW_STATE_RUNNING
 } from './ipc/Workflow';
 import { ensureRange } from '../utils/math/numeric-utils';
 import ensureArray from '../utils/math/ensure-array';
-import ensurePositiveNumber from '../utils/math/ensure-positive-number';
 import evaluateExpression from '../utils/math/evaluateExpression';
 import translateWithContext from '../utils/math/translateWithContext';
 import serialport from 'serialport';
@@ -23,18 +21,18 @@ import {
     WRITE_SOURCE_FEEDER,
     WRITE_SOURCE_SENDER,
     WRITE_SOURCE_QUERY,
-    CONTROLLER_STATUS_INVALID, 
-    CONTROLLER_STATUS_INSTALL_DRIVERING,    
-    CONTROLLER_STATUS_INSTALL_DRIVER_ERROR, 
-    CONTROLLER_STATUS_INSTALL_DRIVERED,     
-    CONTROLLER_STATUS_CONNECTING,           
-    CONTROLLER_STATUS_CONNECTED,            
-    CONTROLLER_STATUS_CONNECT_TIME_OUT,     
+    CONTROLLER_STATUS_INVALID,
+    CONTROLLER_STATUS_CONNECTING,
+    CONTROLLER_STATUS_CONNECTED
 } from './constants';
 import logger from '../utils/log';
 const log = logger('LaserController')
 
-class LaserController {
+const EVENT = {
+    serialportConnected: 'serialport:connected'
+}
+
+class LaserController extends EventEmitter {
     type = LASER;
 
     // SerialPort
@@ -43,20 +41,20 @@ class LaserController {
         baudRate: 115200
     };
 
-    serialport = null;
+    private serialport: any = null;
 
     serialportListener = {
-        data: (data) => {
+        data: (data: any) => {
             this.controller.parse(String(data));
         },
-        close: (err) => {
+        close: (err: any) => {
             this.ready = false;
             if (err) {
                 log.warn(`Disconnected from serial port "${this.options.port}":`, err);
             }
             this.close();
         },
-        error: (err) => {
+        error: (err: any) => {
             this.ready = false;
             if (err) {
                 log.error(`Unexpected error while reading/writing serial port "${this.options.port}":`, err);
@@ -64,20 +62,20 @@ class LaserController {
         }
     };
 
-    allPorts = [];
+    public allPorts: Array<any> = [];
 
-    curPort = 0;
+    public curPort: string = '';
 
-    curPortIndex = 0;
+    private curPortIndex: number = 0;
 
-    lastOpenTime = 0;
+    private lastOpenTime: number = 0;
 
     // Laser
-    controller = null;
+    private controller: any = null;
 
-    ready = false;
+    private ready: boolean = false;
 
-    controller_status = CONTROLLER_STATUS_INVALID; 
+    private controller_status: number = CONTROLLER_STATUS_INVALID;
 
     state = {};
 
@@ -97,18 +95,18 @@ class LaserController {
     };
 
     // Event Trigger
-    event = null;
+    public event = EVENT;
 
     // Feeder
-    feeder = null;
+    private feeder: any = null;
 
     // Sender
-    sender = null;
+    private sender: any = null;
 
-    senderFinishTime = 0;
+    private senderFinishTime = 0;
 
     // Workflow
-    workflow = null;
+    private workflow: any = null;
 
     // start handler(timer)
     handler = null;
@@ -119,7 +117,7 @@ class LaserController {
         }
     };
 
-    dataFilter = (line, context) => {
+    dataFilter = (line: string, context: any) => {
         // Current position
         const {
             x: posx,
@@ -167,6 +165,8 @@ class LaserController {
     };
 
     constructor() {
+        super()
+
         // Feeder,queue to controll events like feed & next.. 
         this.feeder = new Feeder({
             dataFilter: (line, context) => {
@@ -245,7 +245,7 @@ class LaserController {
             this.emitAll('workflow:state', this.workflow.state);
         });
         */
-        this.workflow.on('resume', () => { 
+        this.workflow.on('resume', () => {
             //this.emitAll('workflow:state', this.workflow.state);
             this.sender.next(); // calculate time width handle gcode after restart workflow
         });
@@ -253,18 +253,21 @@ class LaserController {
         this.controller = new Laser();
 
         this.controller.on('data', (res) => {
-            if (!this.isOpen()){
+            if (!this.isOpen()) {
                 log.error(`port is closed, try to connect...`);
                 return;
             }
-            if (!this.ready){
+            if (!this.ready) {
                 this.ready = true;
             }
-            if (CONTROLLER_STATUS_CONNECTED !== this.controller_status){
+            if (CONTROLLER_STATUS_CONNECTED !== this.controller_status) {
+                const { serialportConnected } = this.event
                 this.controller_status = CONTROLLER_STATUS_CONNECTED;
+                // emit success connected to ui
+                this.emit(serialportConnected)
                 log.info('connect status: connecting -> connected.');
             }
-            this.revDataTime =  new Date().getTime(); 
+            this.revDataTime = new Date().getTime();
         });
 
         this.controller.on('pos', (res) => {// get position from serialport:read to make sure mechine is ready
@@ -318,7 +321,7 @@ class LaserController {
                 return;
             }
         });
-        
+
         /*
         this.controller.on('echo', (res) => {
             this.emitAll('serialport:read', res.raw);
@@ -382,12 +385,11 @@ class LaserController {
             }
 
             this.writeln('?');
-            if (now - this.revDataTime > 2000 && CONTROLLER_STATUS_CONNECTING !== this.controller_status){// milliseconds
+            if (now - this.revDataTime > 2000 && CONTROLLER_STATUS_CONNECTING !== this.controller_status) {// milliseconds
                 log.info('connect status:', this.controller_status, '-> 0');
                 this.controller_status = CONTROLLER_STATUS_INVALID;
             }
             this.tryToChangeStatus(now);
-            // emit ui
 
             // Wait for the bootloader to complete before sending commands
             if (!(this.ready)) {
@@ -413,7 +415,7 @@ class LaserController {
                 }
             }
         }, 250);
-        
+
         this.showLogTimer = setInterval(() => {
             log.info('connect status:', this.controller_status, ', ready:', this.ready);
         }, 60000);
@@ -444,7 +446,7 @@ class LaserController {
             clearInterval(this.queryTimer);
             this.queryTimer = null;
         }
-    
+
         if (this.showLogTimer) {
             clearInterval(showLogTimer);
             this.showLogTimer = null;
@@ -658,47 +660,50 @@ class LaserController {
     isOpen() {
         return this.serialport && this.serialport.isOpen;
     }
-    
-    listPort(){
-        serialport.list().then((ports, err) => {
-            if (err){
-                log.error('list port fail:', err);
-                return;
-            }
-            this.allPorts = ports;
-        }
-        );}
 
-    autoConnect(){
-        if (this.curPortIndex >= this.allPorts.length){
-            this.listPort();
+    listPort() {
+        return new Promise((resolve, reject) => {
+            serialport.list().then((ports: any, err: any) => {
+                if (err) {
+                    log.info('list port fail:', err);
+                    reject(false)
+                    return;
+                }
+                this.allPorts = ports;
+                resolve(ports)
+            })
+        })
+    }
+
+    async autoConnect() {
+        if (this.curPortIndex >= this.allPorts.length) {
+            await this.listPort();
             this.curPortIndex = 0;
         }
-        if (0 !== this.allPorts.length){
+        if (this.allPorts.length) {
             this.open(this.allPorts[this.curPortIndex].path);
             this.curPort = this.allPorts[this.curPortIndex].path;
-            this.curPortIndex ++;
+            this.curPortIndex++;
         }
     }
-    
-    resetConnect(){
-        if (null !== this.serialport){
+
+    resetConnect() {
+        if (null !== this.serialport) {
             this.close();
-            this.serialport = null; 
+            this.serialport = null;
         }
         this.ready = false;
     }
 
-    tryToChangeStatus(now){
-        if (0 !== this.lastOpenTime && now - this.lastOpenTime <= 1000)
-        {
+    tryToChangeStatus(now: number) {
+        if (0 !== this.lastOpenTime && now - this.lastOpenTime <= 1000) {
             return;
         }
         this.lastOpenTime = now;
 
         if (CONTROLLER_STATUS_INVALID === this.controller_status) {
             this.controller_status = CONTROLLER_STATUS_CONNECTING;
-        }else if (CONTROLLER_STATUS_CONNECTING === this.controller_status && true === this.ready){
+        } else if (CONTROLLER_STATUS_CONNECTING === this.controller_status && true === this.ready) {
             log.info('connect status: connecting -> connected.');
             this.controller_status = CONTROLLER_STATUS_CONNECTED;
             return;
@@ -710,7 +715,7 @@ class LaserController {
     }
 
     command(socket, cmd, ...args) {
-        const handler = {
+        const handler: any = {
             'gcode:load': () => {
                 const [name, originalGcode, callback = noop] = args;
 
@@ -799,18 +804,18 @@ class LaserController {
                     }
                 }
                 // No executing command && sender is not sending.
-                if (!this.lastCmdType && this.sender.size() === 0 && !this.feeder.isPending()) {
+                if (this.sender.size() === 0 && !this.feeder.isPending()) {
                     this.feeder.next();
                 }
             }
-        }[cmd];
+        };
 
         if (!handler) {
             log.error(`Unknown command: ${cmd}`);
             return;
         }
 
-        handler();
+        handler[cmd] && handler[cmd]();
     }
 
     writeln(data, context = {}) {

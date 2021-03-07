@@ -4,12 +4,13 @@ import { Button, Select, Tag, Divider, Steps } from 'antd'
 import { exec } from 'child_process'
 import path from 'path'
 import logger from "../../utils/log"
+import LaserController from '../../controllers/LaserController'
 import { rendererInvoke, MAIN_EVENT } from '../../utils/ipc';
 import { judgeRouterUrl, loopToInterval } from '../../utils/tool';
 import { DEFAULT_WINDOW_SIZE, NODE_ENV, RESOURCES_PATH } from '../../constants';
 
 const wemakeLog = logger('______Init Page______')
-const Init = (props: any) => {
+const Init = () => {
 
   const [serialports, setSerialports]: any = useState([])
   const [step, setStep]: any = useState(0)
@@ -21,6 +22,7 @@ const Init = (props: any) => {
   const driverName = isMac ? 'mac-os-x-driver' : 'setup-driver'
 
   useEffect(() => {
+    handleConnectSerialport()
     // check driver if exist
     exec(command, (error, stdout) => {
       if (error) {
@@ -57,12 +59,24 @@ const Init = (props: any) => {
         }
         if (stdout.includes(driverName)) {
           setStep(step + 1)
+          handleConnectSerialport()
           resolve(false)
         } else {
           resolve(true)
         }
       })
     })
+  }
+
+  async function handleConnectSerialport() {
+    const serial = new LaserController()
+    const { event: { serialportConnected } } = serial
+    const posts = await serial.listPort()
+    serial.on(serialportConnected, () => {
+      debugger
+      setStep(step + 1)
+    })
+    setSerialports(posts)
   }
 
   // rendererInvoke(MAIN_EVENT.MAIN_OPEN_PAGE, {
@@ -80,7 +94,7 @@ const Init = (props: any) => {
         <Tag color="blue">{t('serialport')}:</Tag>
         <Select placeholder={t('serialport list')}>
           {
-            serialports.map((ele: any) => <Select.Option>{ele.name}</Select.Option>)
+            serialports.map((ele: any) => <Select.Option key={ele.path}>{ele.name}</Select.Option>)
           }
         </Select>
         <Tag style={{ marginLeft: '10px' }} color="#f50">{t('inorder to make mechine work successfully,you must use this application by three steps')}</Tag>
