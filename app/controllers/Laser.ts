@@ -5,13 +5,11 @@ import isEqual from 'lodash/isEqual';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import events from 'events';
-import semver from 'semver';
-import { HEAD_TYPE_3DP, HEAD_TYPE_LASER, HEAD_TYPE_CNC } from './constants';
 import logger from '../utils/log';
-const log = logger('Laser');
+const log = logger('_______Laser______');
 
 // http://stackoverflow.com/questions/10454518/javascript-how-to-retrieve-the-number-of-decimals-of-a-string-number
-function decimalPlaces(num) {
+function decimalPlaces(num: any) {
     const match = (String(num)).match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);
     if (!match) {
         return 0;
@@ -57,10 +55,10 @@ class LaserLineParserResultPosition {
         };
         const pattern = /WPos:(.+)/;
         const params = line.match(pattern);
-        if(!params){
+        if (!params) {
             return null;
         }
-        const xyz = params[1].replace(/\>$/,'')
+        const xyz = params[1].replace(/\>$/, '')
         const posArr = xyz.split(',')
         const digitsX = decimalPlaces(posArr[0]);
         const digitsY = decimalPlaces(posArr[1]);
@@ -133,7 +131,7 @@ class LaserLineParserResultError {
 
 
 class LaserLineParser {
-    parse(line) {
+    parse(line: string) {
         const parsers = [
             // ok
             LaserLineParserResultOk,
@@ -203,7 +201,7 @@ class Laser extends events.EventEmitter {
     // main parser to parse result code of serialport
     parser = new LaserLineParser();
 
-    setState(state) {
+    setState(state: any) {
         const nextState = { ...this.state, ...state };
 
         if (!isEqual(this.state, nextState)) {
@@ -211,7 +209,7 @@ class Laser extends events.EventEmitter {
         }
     }
 
-    set(settings) {
+    set(settings: any) {
         const nextSettings = { ...this.settings, ...settings };
 
         if (!isEqual(this.settings, nextSettings)) {
@@ -220,7 +218,7 @@ class Laser extends events.EventEmitter {
     }
 
     // parse data callback from serialport
-    parse(data) {
+    parse(data: any) {
         data = (String(data)).replace(/\s+$/, '');
         if (!data) {
             return;

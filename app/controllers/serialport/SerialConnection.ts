@@ -9,7 +9,7 @@ const defaultSettings = Object.freeze({
     baudRate: 115200
 });
 
-const toIdent = (options) => {
+const toIdent = (options: any) => {
     // Only the path option is required for generate ident property
     const { port } = { ...options };
     return JSON.stringify({ type: 'serial', port: port });
@@ -18,21 +18,20 @@ const toIdent = (options) => {
 class SerialConnection extends EventEmitter {
     type = 'serial';
 
-    port = null; // Serialport
+    private port: any = null; // Serialport
 
     parser = null; // Readline parser
 
-    writeFilter = (data) => data;
+    writeFilter = (data: any) => data;
 
-    // emit all data to marlinController or other after get data when open a new serialport
     eventListener = {
-        data: (data) => {
+        data: (data: any) => {
             this.emit('data', data);
         },
         open: () => {
             this.emit('open');
         },
-        close: (err) => {
+        close: (err: any) => {
             if (err) {
                 log.warn(`The serial port "${this.settings.port}" was disconnected from the host`);
             }
@@ -56,7 +55,7 @@ class SerialConnection extends EventEmitter {
         }
 
         //const settings = Object.assign({}, ...options, ...defaultSettings) || { };
-        const settings = {...options, ...defaultSettings}
+        const settings = { ...options, ...defaultSettings }
 
         Object.defineProperties(this, {
             settings: {
@@ -76,7 +75,7 @@ class SerialConnection extends EventEmitter {
     }
 
     // @param {function} callback The error-first callback.
-    open(callback) {
+    open(callback: (err: any) => void) {
         if (this.port) {
             const err = new Error(`Cannot open serial port "${this.settings.port}"`);
             callback(err);

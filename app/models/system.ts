@@ -4,7 +4,6 @@
 import immutable from 'immutable';
 // @ts-ignore
 import { SDK_APP_ID } from '@/constants'
-import LaserController from '../controllers/LaserController'
 
 const initialState = {
   /* sa: 机器配置，主要尺寸大小*/
@@ -21,8 +20,7 @@ const initialState = {
   /* sa: 导入的原始图片路径 */
   oriFilePath: null,
   /* sa: 导入的原始图片数据*/
-  oriFileContent: null,
-  laserController: new LaserController()
+  oriFileContent: null
 };
 
 type LocationType = {
