@@ -26,6 +26,7 @@ import {
     CONTROLLER_STATUS_CONNECTED
 } from './constants';
 import logger from '../utils/log';
+import WemakeEvent from '../utils/event';
 const log = logger('LaserController')
 
 const EVENT = {
@@ -261,10 +262,10 @@ class LaserController extends EventEmitter {
                 this.ready = true;
             }
             if (CONTROLLER_STATUS_CONNECTED !== this.controller_status) {
-                const { serialportConnected } = this.event
+                const { serialport: { connected } } = WemakeEvent.event
                 this.controller_status = CONTROLLER_STATUS_CONNECTED;
                 // emit success connected to ui
-                this.emit(serialportConnected)
+                WemakeEvent.emit(connected)
                 log.info('connect status: connecting -> connected.');
             }
             this.revDataTime = new Date().getTime();
