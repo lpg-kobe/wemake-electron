@@ -63,6 +63,12 @@
       "main.prod.js.map",
       "package.json"
     ],
+    "extraFiles": [
+      {
+        "from": "node_modules/@serialport/bindings/build/Release",
+        "to": "./resources"
+      }
+    ],
     "dmg": {
       "contents": [
         {
@@ -75,21 +81,10 @@
           "type": "link",
           "path": "/Applications"
         }
-      ],
-      "extraFiles": [
-        {
-          "from": "node_modules/@serialport/bindings/build/Release",
-          "to": "./Resources"
-        }
       ]
     },
     "mac": {
-      "extraFiles": [
-        {
-          "from": "node_modules/@serialport/bindings/build/Release",
-          "to": "./Resources"
-        }
-      ]
+      
     },
     "win": {
       "extraFiles": [

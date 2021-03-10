@@ -8,6 +8,7 @@ import LaserController from '../../controllers/LaserController'
 import { rendererInvoke, MAIN_EVENT } from '../../utils/ipc';
 import { judgeRouterUrl, loopToInterval } from '../../utils/tool';
 import { DEFAULT_WINDOW_SIZE, NODE_ENV, RESOURCES_PATH } from '../../constants';
+import WemakeEvent from '../../utils/event';
 
 const wemakeLog = logger('______Init Page______')
 const Init = () => {
@@ -19,22 +20,22 @@ const Init = () => {
 
   const isMac = process.platform === 'darwin'
   const command = isMac ? 'ls /System/Library/Extensions' : 'driverquery'
-  const driverName = isMac ? 'mac-os-x-driver' : 'setup-driver'
+  const driverReg = isMac ? /.*usbserial.*/gi : /CH.*SER_A.*$/gi // 'CH341SER_A64'
 
   useEffect(() => {
-    handleConnectSerialport()
     // check driver if exist
     exec(command, (error, stdout) => {
       if (error) {
         wemakeLog.info(`fail by node command exec:`, error)
         return
       }
-      const isInstalled = stdout.includes(driverName)
+      const isInstalled = stdout.match(driverReg)
       const isProduction = NODE_ENV === 'production'
       const driverPath = isProduction ? path.join(RESOURCES_PATH, '/cache') : path.join(__dirname, '../', 'resources')
       const openCommand = isMac ? `open ${path.join(driverPath, '/driver.pkg')}` : `${path.join(driverPath, '/driver.exe')}`
       if (isInstalled) {
         setStep(step + 1)
+        handleConnectSerialport()
       } else {
         exec(openCommand, (error) => {
           if (error) {
@@ -57,7 +58,7 @@ const Init = () => {
           resolve(false)
           return
         }
-        if (stdout.includes(driverName)) {
+        if (stdout.match(driverReg)) {
           setStep(step + 1)
           handleConnectSerialport()
           resolve(false)
@@ -70,23 +71,23 @@ const Init = () => {
 
   async function handleConnectSerialport() {
     const serial = new LaserController()
-    const { event: { serialportConnected } } = serial
     const posts = await serial.listPort()
-    serial.on(serialportConnected, () => {
-      debugger
-      setStep(step + 1)
+    const { serialport: { connected } } = WemakeEvent.event
+    WemakeEvent.on(connected, () => {
+      setStep((step: number) => step + 1)
+      setTimeout(() => {
+        rendererInvoke(MAIN_EVENT.MAIN_OPEN_PAGE, {
+          ...DEFAULT_WINDOW_SIZE.MAIN,
+          namespace: 'homeWindow',
+          closeNamespace: 'initWindow',
+          url: judgeRouterUrl('/home'),
+        }, () => {
+          wemakeLog.info('init success to go home page:')
+        })
+      }, 1000)
     })
     setSerialports(posts)
   }
-
-  // rendererInvoke(MAIN_EVENT.MAIN_OPEN_PAGE, {
-  //   ...DEFAULT_WINDOW_SIZE.MAIN,
-  //   namespace: 'homeWindow',
-  //   closeNamespace: 'initWindow',
-  //   url: judgeRouterUrl('/home'),
-  // }, () => {
-
-  // })
 
   return (
     <div className="init-page-container main-container">
