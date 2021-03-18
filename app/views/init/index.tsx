@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next'
-import { Button, Select, Tag, Divider, Steps } from 'antd'
+import { Button, Select, Tag, Divider, Steps, Popover } from 'antd'
 import { exec } from 'child_process'
 import path from 'path'
 import logger from "../../utils/log"
@@ -71,7 +71,7 @@ const Init = () => {
 
   async function handleConnectSerialport() {
     const serial = new LaserController()
-    const posts = await serial.listPort()
+    const ports = await serial.listPort()
     const { serialport: { connected } } = WemakeEvent.event
     WemakeEvent.on(connected, () => {
       setStep((step: number) => step + 1)
@@ -86,7 +86,7 @@ const Init = () => {
         })
       }, 1000)
     })
-    setSerialports(posts)
+    setSerialports(ports)
   }
 
   return (
@@ -104,15 +104,15 @@ const Init = () => {
       <section>
         <Steps current={step} percent={100 / 3 * (step + 1)}>
           <Steps.Step disabled title={t('detect drive')} description={t('find drive to install')} />
-          <Steps.Step disabled title={t('connect port')} subTitle={t('connecting')} description={t('ready to connect...')} />
+          <Steps.Step disabled title={t('connect port')} subTitle={`${t('connecting')}...`} description={`${t('ready to connect')}`} />
           <Steps.Step disabled title={t('finish connect')} description={t('connect finished to start')} />
         </Steps>
       </section>
       <Divider orientation="left"></Divider>
       <section>
         <div className="flex-between">
-          <Button>{t('help')}</Button>
-          <Button type="primary">{t('connect by yourSelf')}</Button>
+          <Popover content={<p>{t('connect us by email:501968942@qq.com')}</p>}><Button>{t('help')}</Button></Popover>
+          <Button type="primary" disabled title={t('not support now')}>{t('connect by yourSelf')}</Button>
         </div>
       </section>
     </div>

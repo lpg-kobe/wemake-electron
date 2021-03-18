@@ -11,11 +11,11 @@ const PortBash = () => {
   const { t } = useTranslation()
   return <div className="port-bash-cotainer">
     <p>
-      <Tag color="green" style={{ lineHeight: '16px' }}>{t('current port of connecting')}:</Tag>
+      <Tag color="green" style={{ lineHeight: '16px', marginRight: '5px' }}>{t('current port of connecting')}:</Tag>
       <label>{Math.random().toFixed(2)}</label>
     </p>
     <p style={{ margin: '5px 0' }}>
-      <Tag color="green" style={{ lineHeight: '16px' }}>{t('modal of machine')}:</Tag>
+      <Tag color="green" style={{ lineHeight: '16px', marginRight: '5px' }}>{t('modal of machine')}:</Tag>
       <label>wemake</label>
     </p>
     <div className="bash-info" style={{ background: '#000', height: '320px', color: '#fff' }}>
