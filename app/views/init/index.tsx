@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next'
 import { Button, Select, Tag, Divider, Steps, Popover } from 'antd'
+import { LoadingOutlined } from '@ant-design/icons'
 import { exec } from 'child_process'
 import path from 'path'
 import logger from "../../utils/log"
@@ -15,6 +16,11 @@ const Init = () => {
 
   const [serialports, setSerialports]: any = useState([])
   const [step, setStep]: any = useState(0)
+  const [status, setStatus]: any = useState({
+    check: 'wait',
+    connect: 'wait',
+    finish: 'wait'
+  })
 
   const { t } = useTranslation()
 
@@ -35,6 +41,10 @@ const Init = () => {
       const openCommand = isMac ? `open ${path.join(driverPath, '/driver.pkg')}` : `${path.join(driverPath, '/driver.exe')}`
       if (isInstalled) {
         setStep(step + 1)
+        setStatus({
+          ...status,
+          check: 'finish'
+        })
         handleConnectSerialport()
       } else {
         exec(openCommand, (error) => {
@@ -60,6 +70,10 @@ const Init = () => {
         }
         if (stdout.match(driverReg)) {
           setStep(step + 1)
+          setStatus({
+            ...status,
+            check: 'finish'
+          })
           handleConnectSerialport()
           resolve(false)
         } else {
@@ -75,6 +89,10 @@ const Init = () => {
     const { serialport: { connected } } = WemakeEvent.event
     WemakeEvent.on(connected, () => {
       setStep((step: number) => step + 1)
+      setStatus((status: any) => ({
+        ...status,
+        connect: 'finish'
+      }))
       setTimeout(() => {
         rendererInvoke(MAIN_EVENT.MAIN_OPEN_PAGE, {
           ...DEFAULT_WINDOW_SIZE.MAIN,
@@ -102,10 +120,10 @@ const Init = () => {
       </section>
       <Divider orientation="left"></Divider>
       <section>
-        <Steps current={step} percent={100 / 3 * (step + 1)}>
-          <Steps.Step disabled title={t('detect drive')} description={t('find drive to install')} />
-          <Steps.Step disabled title={t('connect port')} subTitle={`${t('connecting')}...`} description={`${t('ready to connect')}`} />
-          <Steps.Step disabled title={t('finish connect')} description={t('connect finished to start')} />
+        <Steps current={step}>
+          <Steps.Step status={status['check']} disabled icon={step === 0 ? <LoadingOutlined /> : null} title={t('detect drive')} description={t('find drive to install')} />
+          <Steps.Step status={status['connect']} disabled icon={step === 1 ? <LoadingOutlined /> : null} title={t('connect port')} subTitle={`${t('connecting')}...`} description={`${t('ready to connect')}`} />
+          <Steps.Step status={status['finish']} disabled icon={step === 2 ? <LoadingOutlined /> : null} title={t('finish connect')} description={t('connect finished to start')} />
         </Steps>
       </section>
       <Divider orientation="left"></Divider>
