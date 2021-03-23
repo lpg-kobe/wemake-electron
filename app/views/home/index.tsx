@@ -8,6 +8,7 @@ import RenderPanel from './components/renderPanel'
 import ControllPanel from './components/controllPanel'
 
 const wemakeLog = logger('______Home Page______')
+
 const Home = () => {
   return (
     <>

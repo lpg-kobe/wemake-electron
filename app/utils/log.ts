@@ -6,9 +6,10 @@
 const winston = require('winston')
 const util = require('util')
 const chalk = require('chalk')
-const { NODE_ENV, RESOURCES_PATH } = require('../constants')
+const os = require('os')
+const { NODE_ENV } = require('../constants')
 const levels = winston.config.npm.levels
-const logFolder = NODE_ENV === 'production' ? `${RESOURCES_PATH}/log` : 'release/log'
+const logFolder = NODE_ENV === 'production' ? `${os.tmpdir()}/log` : 'release/log'
 
 require('winston-daily-rotate-file')
 

@@ -9,13 +9,14 @@ import { useTranslation } from 'react-i18next'
 import fs from 'fs-extra'
 import path from 'path'
 import sharp from 'sharp'
+import os from 'os'
 import { PlusOutlined } from '@ant-design/icons'
-import { NODE_ENV, RESOURCES_PATH } from '../../constants'
+import { NODE_ENV } from '../../constants'
 import AModal from '../modal'
 import logger from '../../utils/log'
 import './style.less'
 
-const imgFolder = NODE_ENV === 'production' ? path.join(RESOURCES_PATH, '/resources/cache') : path.join(__dirname, '../', 'release/cache')
+const imgFolder = NODE_ENV === 'production' ? path.join(os.tmpdir(), '/cache') : path.join(__dirname, '../', 'release/cache')
 const imgPreffix = 'data:image/png;base64,'
 const fileReg = ['jpeg', 'png', 'jpg']
 const wemakeLogger = logger('______File Reader______')

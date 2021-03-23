@@ -36,8 +36,7 @@ export default {
               emit: false,
               // tell electron to find *.node file in directory we set
               rewritePath:
-                process.env.NODE_ENV === 'production'
-                  ? process.platform === 'darwin' ? path.join(__dirname, '../resources') : './resources'
+                process.env.NODE_ENV === 'production' ? '../resources'
                   : 'node_modules/@serialport/bindings/build/Release/'
             }
           }
