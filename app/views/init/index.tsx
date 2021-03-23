@@ -13,7 +13,6 @@ import WemakeEvent from '../../utils/event';
 
 const wemakeLog = logger('______Init Page______')
 const Init = () => {
-
   const [serialports, setSerialports]: any = useState([])
   const [step, setStep]: any = useState(0)
   const [status, setStatus]: any = useState({

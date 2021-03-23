@@ -1,8 +1,8 @@
 {
-  "name": "wemake",
-  "productName": "wemake",
-  "version": "v1.0.0",
-  "description": "wemake",
+  "name": "makex",
+  "productName": "makeX",
+  "version": "v1.1.0",
+  "description": "makeX",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dll": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.renderer.dev.dll.babel.js --colors",
@@ -53,7 +53,7 @@
     ]
   },
   "build": {
-    "productName": "wemake",
+    "productName": "makeX",
     "appId": "org.develar.ElectronReact",
     "files": [
       "dist/",
@@ -83,9 +83,7 @@
         }
       ]
     },
-    "mac": {
-      
-    },
+    "mac": {},
     "win": {
       "extraFiles": [
         {
@@ -128,7 +126,7 @@
       "installerHeaderIcon": "./resources/iconX256.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "wemake"
+      "shortcutName": "makeX"
     }
   },
   "repository": {

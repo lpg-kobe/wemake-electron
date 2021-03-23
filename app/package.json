@@ -1,8 +1,8 @@
 {
-  "name": "live-of-ofweek",
-  "productName": "wemake",
-  "version": "v1.0.0",
-  "description": "wemake",
+  "name": "makex",
+  "productName": "makeX",
+  "version": "v1.1.0",
+  "description": "makeX make my wemake",
   "main": "./main.prod.js",
   "author": {
     "name": "pika",

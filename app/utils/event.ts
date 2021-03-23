@@ -10,7 +10,9 @@ const EVENT = {
     open: 'serialport:open',
     connected: 'serialport:connected'
   },
-  gcode: {}
+  gcode: {
+
+  }
 }
 
 class WemakeEvent extends EventEmitter {
