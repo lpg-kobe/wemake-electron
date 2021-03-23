@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'dva';
 import logger from "../../utils/log"
 import CommonFooter from '../../components/layout/footer'
@@ -6,10 +6,14 @@ import PortBash from './components/portBash'
 import ToolTips from './components/toolTips'
 import RenderPanel from './components/renderPanel'
 import ControllPanel from './components/controllPanel'
+import LaserController from '@/controllers/LaserController'
 
 const wemakeLog = logger('______Home Page______')
 
 const Home = () => {
+  useEffect(() => {
+    new LaserController()
+  }, [])
   return (
     <>
       <section className="home-page-container flex">
