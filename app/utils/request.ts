@@ -23,13 +23,13 @@ function checkStatus(response: Response) {
  * @param  {object} [handler] The handler callback after "fetch"
  * @return {object}           An object containing either "data" or "err"
  */
-export default function request(url: string, options?: any) {
+export default function request(url: string, options?: any, handler?: { onSuccess?: (data: any) => void, onError?: (data: any) => void }) {
   const token = '';
   // 配置默认headers
   const headers = Object.assign({
     'Content-Type': 'application/json;charset=UTF-8',
   }, options?.headers);
-  if (options?.body && (options.body instanceof FormData)) {
+  if (options?.body?.body instanceof FormData) {
     delete headers['Content-Type'];
   }
   if (token) {
@@ -52,9 +52,10 @@ export default function request(url: string, options?: any) {
     .then(checkStatus)
     .then(parseJSON)
     .then((data: any) => {
+      handler?.onSuccess?.(data)
       return { status: true, data };
-    })
-    .catch((err: any) => {
+    }, (err: any) => {
+      handler?.onError?.({ message: 'sth wrong~~' })
       return {
         err,
         status: false,

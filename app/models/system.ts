@@ -60,9 +60,6 @@ export default {
           clientIo
         }
       })
-    },
-    *fetchData({ payload }: any, { call, put }: any) {
-      console.log(payload, call, put)
     }
   },
 
