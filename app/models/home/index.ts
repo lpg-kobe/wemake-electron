@@ -28,7 +28,7 @@ export default {
   },
   effects: {
     *gcodeSplit({ payload }: any, { call }: any) {
-      yield call(gcodeSplit, {})
+      yield call(gcodeSplit, payload)
     }
   },
 

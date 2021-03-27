@@ -10,8 +10,14 @@ import FileReader from '../../../../components/fileReader'
 
 const ControllPanel = () => {
   const { t } = useTranslation()
+
+  /** handle select file */
+  function handleSelect(name: string) {
+    console.log(name)
+  }
+
   return <div className="controll-panel-cotainer">
-    <FileReader options={{ trigger: <Button type="primary" title={t('open img / folder')}>{t('open img / folder')}</Button> }} />
+    <FileReader options={{ trigger: <Button type="primary" title={t('open img / folder')}>{t('open img / folder')}</Button> }} onSelect={handleSelect} />
     <p className="controll-line" title={t('add text')}><Button>{t('add text')}</Button></p>
     <p className="controll-line" style={{ margin: '10px 0' }}>
       <Button style={{ marginRight: '2px' }} type="primary" title={t('start to print')}>{t('start')}</Button>

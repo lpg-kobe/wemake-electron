@@ -3,7 +3,7 @@
  * @author pika
  */
 
-import React, { useRef, useState } from 'react'
+import React, { ReactNode, useRef, useState } from 'react'
 import { Button } from 'antd'
 import { useTranslation } from 'react-i18next'
 import fs from 'fs-extra'
@@ -16,13 +16,20 @@ import AModal from '../modal'
 import logger from '../../utils/log'
 import './style.less'
 
+interface ReaderProps {
+  options?: {
+    trigger?: ReactNode
+  },
+  onSelect: (name: string) => void
+}
+
 const imgFolder = NODE_ENV === 'production' ? path.join(os.tmpdir(), '/cache') : path.join(__dirname, '../', 'release/cache')
 const imgPreffix = 'data:image/png;base64,'
 const fileReg = ['jpeg', 'png', 'jpg']
 const wemakeLogger = logger('______File Reader______')
 
-const FileReader = (props: any) => {
-  const { options } = props
+const FileReader = (props: ReaderProps) => {
+  const { options, onSelect } = props
   const { t } = useTranslation()
   const fileRef: any = useRef(null)
   const [visible, setVisible]: any = useState(false)
@@ -37,9 +44,9 @@ const FileReader = (props: any) => {
       fs.readdir(imgFolder, (err, imgs: Array<any>) => {
         if (err) { return }
         imgs = imgs.filter((name: string) => fileReg.some(type => name.endsWith(type)))
-        imgs.forEach((img: any) => {
-          sharp(path.join(imgFolder, img)).resize(180).toBuffer().then((res: Buffer) => {
-            setFiles((list: Array<string>) => [...list, `${imgPreffix}${res.toString('base64')}`])
+        imgs.forEach((name: any) => {
+          sharp(path.join(imgFolder, name)).resize(180).toBuffer().then((res: Buffer) => {
+            setFiles((list: Array<string>) => [...list, { name, thumbUrl: `${imgPreffix}${res.toString('base64')}` }])
           })
         })
       })
@@ -58,7 +65,8 @@ const FileReader = (props: any) => {
     const { path: filePath, name } = files[0]
     fs.copy(filePath, path.join(imgFolder, name)).then(() => {
       sharp(path.join(imgFolder, name)).resize(180).toBuffer().then((res: Buffer) => {
-        setFiles([...fileList, `${imgPreffix}${res.toString('base64')}`])
+        onSelect?.(name)
+        setFiles([...fileList, { name, thumbUrl: `${imgPreffix}${res.toString('base64')}` }])
       })
       wemakeLogger.info('success to add file to folder:', `${filePath}/${name}`)
     }, (err) => {
@@ -66,6 +74,7 @@ const FileReader = (props: any) => {
     })
   }
 
+  // @ts-ignore
   const TriggerDom = options.trigger ? React.cloneElement(options.trigger, { onClick: handleShowFiles }) : <Button onClick={handleShowFiles}>{t('selectImg')}</Button>
 
   return <>
@@ -75,7 +84,7 @@ const FileReader = (props: any) => {
       <ul>
         {
           fileList.length ?
-            fileList.map((path: string) => <li className="list-item" key={Math.random()}><img src={path} /></li>) : null
+            fileList.map(({ name, thumbUrl }: any) => <li className="list-item" key={Math.random()} onClick={() => onSelect?.(name)}><img src={thumbUrl} /></li>) : null
         }
         <li className="list-item add" title={t('select img')} onClick={handleFileUpload}><PlusOutlined /></li>
       </ul>

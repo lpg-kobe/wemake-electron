@@ -8,11 +8,12 @@ import RenderPanel from './components/renderPanel'
 import ControllPanel from './components/controllPanel'
 import LaserController from '@/controllers/LaserController'
 import { EVENT } from '../../utils/event';
+import { gcodeSplit } from '../../services/api';
 
 const wemakeLog = logger('______Home Page______')
 
 const Home = (props: any) => {
-  const { system: { clientIo } } = props
+  const { system: { clientIo }, dispatch } = props
   useEffect(() => {
     new LaserController()
   }, [])
@@ -27,10 +28,7 @@ const Home = (props: any) => {
     <>
       <section className="home-page-container flex">
         <div className="home-page-container-l">
-          <button onClick={() => props.dispatch({
-            type: 'home/gcodeSplit',
-            payload: {}
-          })}>gcodeSplit</button>
+          <button onClick={() => gcodeSplit(dispatch).then((res: any) => { console.log(res) })}>gcodeSplit demo</button>
           <PortBash {...props} />
         </div>
         <div className="home-page-container-r flex">
