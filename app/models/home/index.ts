@@ -2,6 +2,7 @@
  * @desc system modal during app, base in react-redux and redux-saga
  */
 import immutable from 'immutable';
+import { gcodeSplit } from '../../services/home'
 const initialState = {
   serialports: []
 };
@@ -26,9 +27,8 @@ export default {
     },
   },
   effects: {
-    // demo
-    *fetchData({ payload }: any, { call, put }: any) {
-      console.log(payload, call, put)
+    *gcodeSplit({ payload }: any, { call }: any) {
+      yield call(gcodeSplit, {})
     }
   },
 

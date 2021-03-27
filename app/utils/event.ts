@@ -4,13 +4,23 @@
 
 import { EventEmitter } from 'events'
 
-const EVENT = {
+// global event during appp run
+export const EVENT = {
   serialport: {
     data: 'serialport:data',
     open: 'serialport:open',
     connected: 'serialport:connected'
   },
   gcode: {
+    data: 'gcode:data',
+    split: 'gcode:split',
+  },
+  // socket event of server
+  server: {
+
+  },
+  // socket event of client
+  client: {
 
   }
 }

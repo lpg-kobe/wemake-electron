@@ -11,7 +11,7 @@ import FileReader from '../../../../components/fileReader'
 const ControllPanel = () => {
   const { t } = useTranslation()
   return <div className="controll-panel-cotainer">
-    <p><FileReader options={{ trigger: <Button type="primary" title={t('open img / folder')}>{t('open img / folder')}</Button> }} /></p>
+    <FileReader options={{ trigger: <Button type="primary" title={t('open img / folder')}>{t('open img / folder')}</Button> }} />
     <p className="controll-line" title={t('add text')}><Button>{t('add text')}</Button></p>
     <p className="controll-line" style={{ margin: '10px 0' }}>
       <Button style={{ marginRight: '2px' }} type="primary" title={t('start to print')}>{t('start')}</Button>
@@ -29,24 +29,19 @@ const ControllPanel = () => {
     <p>
       <Button style={{ marginTop: '2px', width: '68px' }} title={t('move laser forward bottom')}>{t('bottom')}</Button>
     </p>
-    <p style={{ marginTop: '20px' }} title={t('set dot speed of print machine by this')}>
-      <Tag color="blue" style={{ marginRight: '5px', lineHeight: '16px', padding: '0 5px' }}>{t('dot speed')}:</Tag>
-      <Radio.Group value={0.1}>
-        <Radio value={0.1}>0.1</Radio>
-        <Radio value={1}>1</Radio>
-        <Radio value={10}>10</Radio>
-      </Radio.Group>
-    </p>
+    <Tag color="blue" title={t('set dot speed of print machine by this')} style={{ margin: '20px 5px 0 0', lineHeight: '16px', padding: '0 5px' }}>
+      {t('dot speed')}:</Tag>
+    <Radio.Group value={0.1}>
+      <Radio value={0.1}>0.1</Radio>
+      <Radio value={1}>1</Radio>
+      <Radio value={10}>10</Radio>
+    </Radio.Group>
     <p>
       <Button style={{ margin: '24px 0', width: '120px' }} title={t('setting')}>{t('setting')}</Button>
     </p>
-    <p style={{ marginTop: '52px' }} title={t('this can set power of laser during printing')}>
-      <Slider defaultValue={30} tooltipVisible tipFormatter={(value: any) => `${t('power of laser')}：${value}%`} />
-    </p>
-    <p style={{ marginTop: '52px' }} title={t('this can set how long your laser stay during printing')}>
-      <Slider defaultValue={30} tooltipVisible tipFormatter={(value: any) => `${t('time of laser stay')}：${value}ms`} />
-    </p>
-  </div>
+    <Slider style={{ marginTop: '52px' }} title={t('this can set power of laser during printing')} defaultValue={30} tooltipVisible tipFormatter={(value: any) => `${t('power of laser')}：${value}%`} />
+    <Slider style={{ marginTop: '52px' }} title={t('this can set how long your laser stay during printing')} defaultValue={30} tooltipVisible tipFormatter={(value: any) => `${t('time of laser stay')}：${value}ms`} />
+  </div >
 }
 
 export default ControllPanel

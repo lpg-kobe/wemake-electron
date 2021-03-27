@@ -17,6 +17,7 @@ import { MAIN_EVENT, RENDERER_EVENT, mainListen, mainHandle } from './utils/ipc'
 import { DEFAULT_WINDOW_CONFIG, DEFAULT_WINDOW_SIZE } from './constants'
 import { productName, version } from './package.json'
 import logger from './utils/log'
+import '../internals/scripts/server'
 // import MenuBuilder from './menu';
 
 const wemakeLogger = logger('______Main Process______')

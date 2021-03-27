@@ -10,6 +10,7 @@ import { rendererInvoke, MAIN_EVENT } from '../../utils/ipc';
 import { judgeRouterUrl, loopToInterval } from '../../utils/tool';
 import { DEFAULT_WINDOW_SIZE, NODE_ENV, RESOURCES_PATH } from '../../constants';
 import WemakeEvent from '../../utils/event';
+import { connect } from 'dva';
 
 const wemakeLog = logger('______Init Page______')
 const Init = () => {
@@ -28,6 +29,14 @@ const Init = () => {
   const driverReg = isMac ? /.*usbserial.*/gi : /CH.*SER_A.*$/gi // 'CH341SER_A64'
 
   useEffect(() => {
+    rendererInvoke(MAIN_EVENT.MAIN_OPEN_PAGE, {
+      ...DEFAULT_WINDOW_SIZE.MAIN,
+      namespace: 'homeWindow',
+      closeNamespace: 'initWindow',
+      url: judgeRouterUrl('/home'),
+    }, () => {
+      wemakeLog.info('init success to go home page:')
+    })
     // check driver if exist
     exec(command, (error, stdout) => {
       if (error) {
