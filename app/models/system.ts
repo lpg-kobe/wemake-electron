@@ -2,8 +2,9 @@
  * @desc system modal during app, base in react-redux and redux-saga
  */
 import immutable from 'immutable';
+import { io } from 'socket.io-client'
 // @ts-ignore
-import { SDK_APP_ID } from '@/constants'
+import { SDK_APP_ID, SOCKET_HOST } from '@/constants'
 
 const initialState = {
   /* sa: 机器配置，主要尺寸大小*/
@@ -20,7 +21,9 @@ const initialState = {
   /* sa: 导入的原始图片路径 */
   oriFilePath: null,
   /* sa: 导入的原始图片数据*/
-  oriFileContent: null
+  oriFileContent: null,
+  /* socket: client instance of socket */
+  clientIo: null
 };
 
 type LocationType = {
@@ -38,12 +41,26 @@ export default {
   subscriptions: {
     setup({ history, dispatch }: SetUpType) {
       return history.listen(({ pathname }: LocationType) => {
-        console.log(dispatch, pathname)
+        if (pathname === '/home') {
+          dispatch({
+            type: 'initClientIo',
+            payload: {}
+          })
+        }
       })
     },
   },
   effects: {
-    // demo
+    // init client socket during app run
+    *initClientIo({ payload }: any, { put }: any) {
+      const clientIo = io(SOCKET_HOST)
+      yield put({
+        type: 'save',
+        payload: {
+          clientIo
+        }
+      })
+    },
     *fetchData({ payload }: any, { call, put }: any) {
       console.log(payload, call, put)
     }
