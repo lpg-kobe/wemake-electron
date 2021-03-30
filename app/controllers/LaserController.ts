@@ -819,13 +819,16 @@ class LaserController extends EventEmitter {
         handler[cmd] && handler[cmd]();
     }
 
+    const base_cmds = ['?', '!', '~'];
+
     writeln(data, context = {}) {
         if (!this.isOpen()) {
             log.debug(`Serial port "${this.curPort}" is not accessible`);
             return;
         }
 
-        if (!data.endsWith('\n')) {
+        // sa: ?,!,~ not need \n
+        if ((!_includes(base_cmds, data)) && (!data.endsWith('\n'))) {
             data += '\n';
         }
 

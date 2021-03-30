@@ -25,7 +25,7 @@ interface ReaderProps {
 
 const imgFolder = NODE_ENV === 'production' ? path.join(os.tmpdir(), '/cache') : path.join(__dirname, '../', 'release/cache')
 const imgPreffix = 'data:image/png;base64,'
-const fileReg = ['jpeg', 'png', 'jpg']
+const fileReg = ['jpeg', 'png', 'jpg', 'svg']
 const wemakeLogger = logger('______File Reader______')
 
 const FileReader = (props: ReaderProps) => {
@@ -79,7 +79,7 @@ const FileReader = (props: ReaderProps) => {
 
   return <>
     {TriggerDom}
-    <input type="file" accept="image/png, image/jpeg, image/jpg" hidden ref={fileRef} onChange={handleFileChange} />
+    <input type="file" accept="image/png, image/jpeg, image/jpg, image/svg" hidden ref={fileRef} onChange={handleFileChange} />
     <AModal footer={null} visible={visible} width={520} onCancel={() => { setFiles([]); setVisible(false) }} className="img-card-modal">
       <ul>
         {

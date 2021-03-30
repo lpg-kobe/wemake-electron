@@ -218,19 +218,7 @@ export function exitFullScreen() {
   cancelFn.call(document);
 }
 
-/**
- * @desc 图片宽高等比换算机器X轴Y轴坐标
- */
-export function transImgToMachineSize(size: any, width: number, height: number) {
-  let height_ = height;
-  let width_ = width;
-  if (width_ * size.y >= height_ * size.x && width_ > size.x) {
-    height_ = size.x * height_ / width_;
-    width_ = size.x;
-  }
-  if (height_ * size.x >= width_ * size.y && height_ > size.y) {
-    width_ = size.y * width_ / height_;
-    height_ = size.y;
-  }
-  return { width: width_, height: height_ };
-};
+export function getMachineSize(type : any)
+{
+    return { x : machineList[type].X, y :  machineList[type].Y};
+}
