@@ -116,7 +116,7 @@ const RenderPanel = () => {
             },
             false
         );
-    }, [])
+    }, []);
 
     componentWillReceiveProps(nextProps) {
         const { renderingTimestamp } = nextProps;
@@ -192,17 +192,13 @@ const RenderPanel = () => {
                         toolPathModelGroup={this.props.toolPathModelGroup.object}
                         printableArea={this.printableArea}
                         cameraInitialPosition={new THREE.Vector3(0, 0, 70)}
-                        onSelectModel={this.actions.onSelectModel}
-                        onUnselectAllModels={this.actions.onUnselectAllModels}
-                        onModelAfterTransform={this.actions.onModelAfterTransform}
-                        onModelTransform={this.actions.onModelTransform}
+                        onSelectModel={this.props.onSelectModel}
+                        onUnselectAllModels={this.props.onUnselectAllModels}
+                        onModelAfterTransform={this.props.onModelAfterTransform}
+                        onModelTransform={this.props.onModelTransform}
                         showContextMenu={this.showContextMenu}
                         transformSourceType="2D"
                     />
-                </div>
-                <!-- 
-                <div className={styles['canvas-footer']}>
-                    <SecondaryToolbar actions={this.actions} />
                 </div>
                 {estimatedTime && (
                     <div className={styles['visualizer-info']}>
@@ -235,13 +231,13 @@ const RenderPanel = () => {
                                 type: 'item',
                                 label: i18n._('Bring to Front'),
                                 disabled: !isModelSelected,
-                                onClick: this.actions.bringToFront
+                                onClick: this.props.bringToFront
                             },
                             {
                                 type: 'item',
                                 label: i18n._('Send to Back'),
                                 disabled: !isModelSelected,
-                                onClick: this.actions.sendToBack
+                                onClick: this.props.sendToBack
                             },
                             {
                                 type: 'subMenu',
@@ -272,7 +268,7 @@ const RenderPanel = () => {
                                 type: 'item',
                                 label: i18n._('Delete Selected Model'),
                                 disabled: !isModelSelected,
-                                onClick: this.actions.deleteSelectedModel
+                                onClick: this.props.deleteSelectedModel
                             }
                         ]
                     }
@@ -281,40 +277,5 @@ const RenderPanel = () => {
         );
     }
 }
-
-const mapStateToProps = (state) => {
-    const machine = state.machine;
-
-    const { background } = state.laser;
-    const { selectedModelID, modelGroup, toolPathModelGroup, hasModel, renderingTimestamp } = state.laser;
-    return {
-        size: machine.size,
-        hasModel,
-        selectedModelID,
-        modelGroup,
-        toolPathModelGroup,
-        // model,
-        backgroundGroup: background.group,
-        renderingTimestamp
-    };
-};
-
-const mapDispatchToProps = (dispatch) => {
-    return {
-        getEstimatedTime: (type) => dispatch(actions.getEstimatedTime('laser', type)),
-        getSelectedModel: () => dispatch(actions.getSelectedModel('laser')),
-        bringSelectedModelToFront: () => dispatch(actions.bringSelectedModelToFront('laser')),
-        sendSelectedModelToBack: () => dispatch(actions.sendSelectedModelToBack('laser')),
-        arrangeAllModels2D: () => dispatch(actions.arrangeAllModels2D('laser')),
-        // updateSelectedModelTransformation: (transformation) => dispatch(actions.updateSelectedModelTransformation('laser', transformation)),
-        onSetSelectedModelPosition: (position) => dispatch(actions.onSetSelectedModelPosition('laser', position)),
-        onFlipSelectedModel: (flip) => dispatch(actions.onFlipSelectedModel('laser', flip)),
-        selectModel: (model) => dispatch(actions.selectModel('laser', model)),
-        unselectAllModels: () => dispatch(actions.unselectAllModels('laser')),
-        removeSelectedModel: () => dispatch(actions.removeSelectedModel('laser')),
-        onModelTransform: () => dispatch(actions.onModelTransform('laser')),
-        onModelAfterTransform: () => dispatch(actions.onModelAfterTransform('laser'))
-    };
-};
 
 export default RenderPanel 
