@@ -1,281 +1,226 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import PropTypes from 'prop-types';
-import isEqual from 'lodash/isEqual';
 
 import { EPSILON } from '../../constants';
 import controller from '../../lib/controller';
-import { toFixed } from '../../lib/numeric-utils';
-import i18n from '../../lib/i18n';
-import ProgressBar from '../../components/ProgressBar';
-import Space from '../../components/Space';
-import ContextMenu from '../../components/ContextMenu';
+// @ts-ignore
+import ContextMenu from '@/components/contextMenu';
+// import ProgressBar from '../../components/ProgressBar';
+import Canvas from './Canvas';
+import { useTranslation } from 'react-i18next'
+// import PrintablePlate from '../CncLaserShared/PrintablePlate';
 
-import Canvas from '../../components/SMCanvas';
-import PrintablePlate from '../CncLaserShared/PrintablePlate';
-import SecondaryToolbar from '../CanvasToolbar/SecondaryToolbar';
-import { actions } from '../../flux/cncLaserShared';
-import VisualizerTopLeft from './VisualizerTopLeft';
-import styles from './styles.styl';
+const RenderPanel = (props: any) => {
+    const { t } = useTranslation()
+    const {
+        size,
+        modelGroup,
+        backgroundGroup,
+        toolPathModelGroup,
+        unselectAllModels,
+        selectedModelID,
+        selectModel,
+        getSelectedModel,
+        getEstimatedTime,
+        removeSelectedModel,
+        onFlipSelectedModel,
+        renderingTimestamp,
+        bringSelectedModelToFront,
+        sendSelectedModelToBack
+    } = props
 
-
-function humanReadableTime(t) {
-    const hours = Math.floor(t / 3600);
-    const minutes = Math.ceil((t - hours * 3600) / 60);
-    return (hours > 0 ? `${hours} h ${minutes} min` : `${minutes} min`);
-}
-
-const RenderPanel = () => {
-    contextMenuRef = React.useRef();
-
-    visualizerRef = React.useRef();
-
-    printableArea = null;
-
-    canvas = React.useRef();
-
-    state = {
-        progress: 0
-    };
-
-    actions = {
-        // canvas footer
-        zoomIn: () => {
-            this.canvas.current.zoomIn();
-        },
-        zoomOut: () => {
-            this.canvas.current.zoomOut();
-        },
-        autoFocus: () => {
-            this.canvas.current.autoFocus();
-        },
-        onSelectModel: (model) => {
-            this.props.selectModel(model);
-        },
-        onUnselectAllModels: () => {
-            this.props.unselectAllModels();
-        },
-        onModelAfterTransform: () => {
-            this.props.onModelAfterTransform();
-        },
-        onModelTransform: () => {
-            this.props.onModelTransform();
-        },
-        // context menu
-        bringToFront: () => {
-            this.props.bringSelectedModelToFront();
-        },
-        sendToBack: () => {
-            this.props.sendSelectedModelToBack();
-        },
-        onUpdateSelectedModelPosition: (position) => {
-            this.props.onSetSelectedModelPosition(position);
-        },
-        deleteSelectedModel: () => {
-            this.props.removeSelectedModel();
-            this.setState({
-                progress: 0
-            });
-        },
-    };
-
-    controllerEvents = {
+    const machineArea = size.x * size.y
+    const controllerEvents: any = {
         'task:completed': () => {
-            this.setState({
-                progress: 1.0
-            });
+            setProgress(0)
         },
-        'task:progress': (progress) => {
-            if (Math.abs(progress - this.state.progress) > 0.05) {
-                this.setState({
-                    progress: progress
-                });
+        'task:progress': (pro: number) => {
+            if (Math.abs(pro - progress) > 0.05) {
+                setProgress(pro)
             }
         }
     };
 
-    constructor(props) {
-        super(props);
+    const contextMenuRef: any = useRef(null);
+    const visualizerRef: any = useRef(null);
+    const canvas: any = useRef(null);
+    const [printableArea, setPrintableArea]: any = useState(null)
+    const [progress, setProgress]: any = useState(null)
 
-        const size = props.size;
-        this.printableArea = new PrintablePlate(size);
+    function humanReadableTime(t: number) {
+        const hours = Math.floor(t / 3600);
+        const minutes = Math.ceil((t - hours * 3600) / 60);
+        return (hours > 0 ? `${hours} h ${minutes} min` : `${minutes} min`);
     }
 
-    useEffect(() => {
-        this.addControllerEvents();
-
-        this.canvas.current.resizeWindow();
-        this.canvas.current.disable3D();
-
-        window.addEventListener(
-            'hashchange',
-            (event) => {
-                if (event.newURL.endsWith('laser')) {
-                    this.canvas.current.resizeWindow();
-                }
-            },
-            false
-        );
-    }, []);
-
-    componentWillReceiveProps(nextProps) {
-        const { renderingTimestamp } = nextProps;
-
-        if (!isEqual(nextProps.size, this.props.size)) {
-            const size = nextProps.size;
-            this.printableArea.updateSize(size);
-        }
-
-        this.canvas.current.updateTransformControl2D();
-        const { selectedModelID } = nextProps;
-        if (selectedModelID !== this.props.selectedModelID) {
-            const selectedModel = this.props.getSelectedModel();
-            if (!selectedModel) {
-                this.canvas.current.controls.detach();
-            } else {
-                const sourceType = selectedModel.sourceType;
-                if (sourceType === 'text') {
-                    this.canvas.current.setTransformControls2DState({ enabledScale: false });
-                } else {
-                    this.canvas.current.setTransformControls2DState({ enabledScale: true });
-                }
-                const meshObject = selectedModel.meshObject;
-                if (meshObject) {
-                    this.canvas.current.controls.attach(meshObject);
-                }
-            }
-        }
-
-        if (renderingTimestamp !== this.props.renderingTimestamp) {
-            this.canvas.current.renderScene();
-        }
-    }
-
-    showContextMenu = (event) => {
-        this.contextMenuRef.current.show(event);
-    };
-
-    addControllerEvents() {
-        Object.keys(this.controllerEvents).forEach(eventName => {
-            const callback = this.controllerEvents[eventName];
+    function addControllerEvents() {
+        Object.keys(controllerEvents).forEach(eventName => {
+            const callback = controllerEvents[eventName];
             controller.on(eventName, callback);
         });
     }
 
-    removeControllerEvents() {
-        Object.keys(this.controllerEvents).forEach(eventName => {
-            const callback = this.controllerEvents[eventName];
+    function onModelAfterTransform() {
+        onModelAfterTransform();
+    }
+
+    function onModelTransform() {
+        onModelTransform();
+    }
+
+    function deleteSelectedModel() {
+        removeSelectedModel();
+        setProgress(0)
+    }
+
+    useEffect(() => {
+        // do sth once x&y change of machine
+        // setPrintableArea(new PrintablePlate(size))
+        printableArea.updateSize(size);
+    }, [machineArea])
+
+    useEffect(() => {
+        addControllerEvents();
+        canvas?.current?.resizeWindow();
+        canvas?.current?.disable3D();
+        return () => {
+            removeControllerEvents()
+        }
+    }, [])
+
+    useEffect(() => {
+        canvas.current.renderScene()
+        // canvas.current.updateTransformControl2D();  ??????
+    }, [renderingTimestamp])
+
+    useEffect(() => {
+        const selectedModel = getSelectedModel();
+        if (!selectedModel) {
+            canvas.current.controls.detach();
+        } else {
+            const sourceType = selectedModel.sourceType;
+            if (sourceType === 'text') {
+                canvas.current.setTransformControls2DState({ enabledScale: false });
+            } else {
+                canvas.current.setTransformControls2DState({ enabledScale: true });
+            }
+            const meshObject = selectedModel.meshObject;
+            if (meshObject) {
+                canvas.current.controls.attach(meshObject);
+            }
+        }
+    }, [selectedModelID])
+
+    function showContextMenu(event: any) {
+        contextMenuRef?.current?.show(event);
+    };
+
+    function removeControllerEvents() {
+        Object.keys(controllerEvents).forEach(eventName => {
+            const callback = controllerEvents[eventName];
             controller.off(eventName, callback);
         });
     }
 
-    render() {
-        const isModelSelected = !!this.props.selectedModelID;
-        const hasModel = this.props.hasModel;
+    const isModelSelected = !!selectedModelID;
+    const estimatedTime = isModelSelected ? getEstimatedTime('selected') : getEstimatedTime('total');
 
-        const estimatedTime = isModelSelected ? this.props.getEstimatedTime('selected') : this.props.getEstimatedTime('total');
-
-        return (
-            <div
-                ref={this.visualizerRef}
-                style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}
-            >
-                <div className={styles['visualizer-top-left']}>
-                    <VisualizerTopLeft />
-                </div>
-                <div className={styles['canvas-content']}>
-                    <Canvas
-                        ref={this.canvas}
-                        size={this.props.size}
-                        backgroundGroup={this.props.backgroundGroup}
-                        modelGroup={this.props.modelGroup.object}
-                        toolPathModelGroup={this.props.toolPathModelGroup.object}
-                        printableArea={this.printableArea}
-                        cameraInitialPosition={new THREE.Vector3(0, 0, 70)}
-                        onSelectModel={this.props.onSelectModel}
-                        onUnselectAllModels={this.props.onUnselectAllModels}
-                        onModelAfterTransform={this.props.onModelAfterTransform}
-                        onModelTransform={this.props.onModelTransform}
-                        showContextMenu={this.showContextMenu}
-                        transformSourceType="2D"
-                    />
-                </div>
-                {estimatedTime && (
-                    <div className={styles['visualizer-info']}>
-                        {i18n._('Estimated Time:')}<Space width={4} />{humanReadableTime(estimatedTime)}
-                    </div>
-                )}
-
-                {isModelSelected && (
-                    <div className={styles['visualizer-notice']}>
-                        {(this.state.progress < 1 - EPSILON) && (
-                            <p>{i18n._('Generating tool path... {{progress}}%', { progress: toFixed(this.state.progress, 2) * 100.0 })}</p>
-                        )}
-                        {(this.state.progress > 1 - EPSILON) && (
-                            <p>{i18n._('Generated tool path successfully.')}</p>
-                        )}
-                    </div>
-                )}
-                {isModelSelected && (
-                    <div className={styles['visualizer-progress']}>
-                        <ProgressBar progress={this.state.progress * 100.0} />
-                    </div>
-                )}
-                -->
-                <ContextMenu
-                    ref={this.contextMenuRef}
-                    id="laser"
-                    menuItems={
-                        [
-                            {
-                                type: 'item',
-                                label: i18n._('Bring to Front'),
-                                disabled: !isModelSelected,
-                                onClick: this.props.bringToFront
-                            },
-                            {
-                                type: 'item',
-                                label: i18n._('Send to Back'),
-                                disabled: !isModelSelected,
-                                onClick: this.props.sendToBack
-                            },
-                            {
-                                type: 'subMenu',
-                                label: i18n._('Flip'),
-                                disabled: !isModelSelected,
-                                items: [
-                                    {
-                                        type: 'item',
-                                        label: i18n._('Vertical'),
-                                        onClick: () => this.props.onFlipSelectedModel('Vertical')
-                                    },
-                                    {
-                                        type: 'item',
-                                        label: i18n._('Horizontal'),
-                                        onClick: () => this.props.onFlipSelectedModel('Horizontal')
-                                    },
-                                    {
-                                        type: 'item',
-                                        label: i18n._('Reset'),
-                                        onClick: () => this.props.onFlipSelectedModel('Reset')
-                                    }
-                                ]
-                            },
-                            {
-                                type: 'separator'
-                            },
-                            {
-                                type: 'item',
-                                label: i18n._('Delete Selected Model'),
-                                disabled: !isModelSelected,
-                                onClick: this.props.deleteSelectedModel
-                            }
-                        ]
-                    }
+    return (
+        <div
+            ref={visualizerRef}
+            style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}
+        >
+            <div className='canvas-content'>
+                <Canvas
+                    ref={canvas}
+                    size={size}
+                    backgroundGroup={backgroundGroup}
+                    modelGroup={modelGroup.object}
+                    toolPathModelGroup={toolPathModelGroup.object}
+                    printableArea={printableArea}
+                    cameraInitialPosition={new THREE.Vector3(0, 0, 70)}
+                    onSelectModel={(model: any) => selectModel(model)}
+                    onUnselectAllModels={unselectAllModels}
+                    onModelAfterTransform={onModelAfterTransform}
+                    onModelTransform={onModelTransform}
+                    showContextMenu={showContextMenu}
+                    transformSourceType="2D"
                 />
             </div>
-        );
-    }
+            {estimatedTime && (
+                <div className='visualizer-info'>
+                    {t('Estimated Time：')}{humanReadableTime(estimatedTime)}
+                </div>
+            )}
+
+            {isModelSelected && (
+                <div className='visualizer-notice'>
+                    {(progress < 1 - EPSILON) && (
+                        <p>{t('Generating tool path... {{progress}}%')}</p>
+                    )}
+                    {(progress > 1 - EPSILON) && (
+                        <p>{t('Generated tool path successfully.')}</p>
+                    )}
+                </div>
+            )}
+            {isModelSelected && (
+                <div className='visualizer-progress'>
+                    {/* <ProgressBar progress={progress * 100} /> */}
+                </div>
+            )}
+            <ContextMenu
+                ref={contextMenuRef}
+                id="laser"
+                menuItems={
+                    [
+                        {
+                            type: 'item',
+                            label: t('Bring to Front'),
+                            disabled: !isModelSelected,
+                            onClick: bringSelectedModelToFront
+                        },
+                        {
+                            type: 'item',
+                            label: t('Send to Back'),
+                            disabled: !isModelSelected,
+                            onClick: sendSelectedModelToBack
+                        },
+                        {
+                            type: 'subMenu',
+                            label: t('Flip'),
+                            disabled: !isModelSelected,
+                            items: [
+                                {
+                                    type: 'item',
+                                    label: t('Vertical'),
+                                    onClick: () => onFlipSelectedModel('Vertical')
+                                },
+                                {
+                                    type: 'item',
+                                    label: t('Horizontal'),
+                                    onClick: () => onFlipSelectedModel('Horizontal')
+                                },
+                                {
+                                    type: 'item',
+                                    label: t('Reset'),
+                                    onClick: () => onFlipSelectedModel('Reset')
+                                }
+                            ]
+                        },
+                        {
+                            type: 'separator'
+                        },
+                        {
+                            type: 'item',
+                            label: t('Delete Selected Model'),
+                            disabled: !isModelSelected,
+                            onClick: deleteSelectedModel
+                        }
+                    ]
+                }
+            />
+        </div>
+    );
 }
 
-export default RenderPanel 
+export default RenderPanel

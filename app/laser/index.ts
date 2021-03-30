@@ -16,110 +16,110 @@ export const actions = {
                 transformation: {
                     ...transformation
                 }
-        };
-    },
+            };
+        },
 
-    updateGcodeConfig: (gcodeConfig) => {
-        return {
-            type: 'home/save',
-            payload: {
-                gcodeConfig: {
-                    ...gcodeConfig
+            updateGcodeConfig: (gcodeConfig) => {
+                return {
+                    type: 'home/save',
+                    payload: {
+                        gcodeConfig: {
+                            ...gcodeConfig
+                        }
+                    }
+                };
+            },
+
+                updateConfig: (config) => {
+                    return {
+                        type: 'home/save',
+                        payload: {
+                            config: {
+                                ...config
+                            }
+                        }
+                    };
+                },
+
+                    resetCalculatedState: () => {
+                        return {
+                            type: 'home/save',
+                            payload: {
+                                isAllModelsPreviewed: false,
+                                isGcodeGenerated: false,
+                                gcodeBeans: []
+                            }
+                        };
+                    },
+
+                        updateState: (newSate) = {
+                            return {
+                                type: 'home/save',
+                                payload: {
+                                    ...newSate
+                                }
+                            };
+                        }
+
+        render: () => {
+            return {
+                type: 'home/save',
+                payload: {
+                    renderingTimestamp: +new Date()
                 }
-            }
-        };
-    },
+            };
+        },
 
-    updateConfig: (config) => {
-        return {
-            type: 'home/save',
-            payload: {
-                config: {
-                    ...config
-                }
-            }
-        };
-    },
+            init: () => (dispatch) => {
+                const controllerEvents = {
+                    'task:completed': (taskResult) => {
+                        dispatch(sharedActions.onReceiveTaskResult('laser', taskResult));
+                    }
+                };
 
-    resetCalculatedState: () => {
-        return {
-            type: 'home/save',
-            payload: {
-                isAllModelsPreviewed: false,
-                isGcodeGenerated: false,
-                gcodeBeans: []
-            }
-        };
-    },
+                Object.keys(controllerEvents).forEach(event => {
+                    controller.on(event, controllerEvents[event]);
+                });
+            },
 
-    updateState: (newSate) = {
-        return {
-            type: 'home/save',
-            payload: {
-                ...newSate
-            }
-        };
-    }
+                setBackgroundEnabled: (enabled) => {
+                    return {
+                        type: 'home/save',
+                        payload: {
+                            enabled
+                        }
+                    };
+                },
 
-    render: () => {
-        return {
-            type: 'home/save',
-            payload: {
-                renderingTimestamp: +new Date()
-            }
-        };
-    },
+                    setBackgroundImage: (filename, width, height, dx, dy) => (dispatch, getState) => {
+                        const imgPath = `${DATA_PREFIX}/${filename}`;
+                        const texture = new THREE.TextureLoader().load(imgPath);
+                        const material = new THREE.MeshBasicMaterial({
+                            color: 0xffffff,
+                            transparent: true,
+                            opacity: 1,
+                            map: texture
+                        });
+                        const geometry = new THREE.PlaneGeometry(width, height);
+                        const mesh = new THREE.Mesh(geometry, material);
+                        const x = dx + width / 2;
+                        const y = dy + height / 2;
+                        mesh.position.set(x, y, 0);
 
-    init: () => (dispatch) => {
-        const controllerEvents = {
-            'task:completed': (taskResult) => {
-                dispatch(sharedActions.onReceiveTaskResult('laser', taskResult));
-            }
-        };
+                        const state = getState().laser;
+                        const { group } = state.background;
+                        group.remove(...group.children);
+                        group.add(mesh);
+                        dispatch(actions.setBackgroundEnabled(true));
+                    },
 
-        Object.keys(controllerEvents).forEach(event => {
-            controller.on(event, controllerEvents[event]);
-        });
-    },
-
-    setBackgroundEnabled: (enabled) => {
-        return {
-            type: 'home/save',
-            payload: {
-                enabled
-            }
-        };
-    },
-
-    setBackgroundImage: (filename, width, height, dx, dy) => (dispatch, getState) => {
-        const imgPath = `${DATA_PREFIX}/${filename}`;
-        const texture = new THREE.TextureLoader().load(imgPath);
-        const material = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            transparent: true,
-            opacity: 1,
-            map: texture
-        });
-        const geometry = new THREE.PlaneGeometry(width, height);
-        const mesh = new THREE.Mesh(geometry, material);
-        const x = dx + width / 2;
-        const y = dy + height / 2;
-        mesh.position.set(x, y, 0);
-
-        const state = getState().laser;
-        const { group } = state.background;
-        group.remove(...group.children);
-        group.add(mesh);
-        dispatch(actions.setBackgroundEnabled(true));
-    },
-
-    removeBackgroundImage: () => (dispatch, getState) => {
-        const state = getState().laser;
-        const { group } = state.background;
-        group.remove(...group.children);
-        dispatch(actions.setBackgroundEnabled(false));
-    }
-};
+                        removeBackgroundImage: () => (dispatch, getState) => {
+                            const state = getState().laser;
+                            const { group } = state.background;
+                            group.remove(...group.children);
+                            dispatch(actions.setBackgroundEnabled(false));
+                        }
+    };
     uploadImage: (file, mode, onError) => (dispatch) => {
         if (!file) {
             onError(`Params error: file = ${file}`);
@@ -298,7 +298,7 @@ export const actions = {
             ...toolPathModelState
         });
         if (!modelState.hasModel) {
-            dispatch(actions.updateState{
+            dispatch(actions.updateState({
                 stage: 0,
                 progress: 0
             }));
