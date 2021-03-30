@@ -4,7 +4,44 @@
 import immutable from 'immutable';
 import { gcodeSplit } from '../../services/home'
 const initialState = {
-  serialports: []
+    serialports: [],
+    modelGroup: new ModelGroup(),
+    toolPathModelGroup: new ToolPathModelGroup(),
+
+    isAllModelsPreviewed: false,
+    isGcodeGenerated: false,
+    gcodeBeans: [], // gcodeBean: { gcode, modelInfo }
+    
+    selectedModelID: null,
+    sourceType: '',
+    mode: '', // bw, greyscale, vector
+    printOrder: 1,
+    transformation: {},
+    gcodeConfig: {},
+    config: {},
+
+    // snapshot state
+    undoSnapshots: [{ models: [], toolPathModels: [] }], // snapshot { models, toolPathModels }
+    redoSnapshots: [], // snapshot { models, toolPathModels }
+    canUndo: false,
+    canRedo: false,
+
+    // modelGroup state
+    hasModel: false,
+    isAnyModelOverstepped: false,
+
+    // boundingBox: new THREE.Box3(new THREE.Vector3(), new THREE.Vector3()), // bbox of selected model
+    background: {
+        enabled: false,
+        group: new THREE.Group()
+    },
+
+    previewUpdated: 0,
+    previewFailed: false,
+    autoPreviewEnabled: true,
+
+    // rendering
+    renderingTimestamp: 0
 };
 
 type LocationType = {
