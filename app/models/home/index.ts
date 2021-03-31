@@ -5,6 +5,7 @@ import immutable from 'immutable';
 import { gcodeSplit } from '../../services/home'
 const initialState = {
     serialports: [],
+    mahine: 'X1',
     modelGroup: new ModelGroup(),
     toolPathModelGroup: new ToolPathModelGroup(),
 

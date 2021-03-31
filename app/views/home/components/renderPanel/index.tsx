@@ -70,14 +70,20 @@ const RenderPanel = (props: any) => {
 
     function deleteSelectedModel() {
         removeSelectedModel();
-        setProgress(0)
+        setProgress(0);
     }
 
     useEffect(() => {
         // do sth once x&y change of machine
         // setPrintableArea(new PrintablePlate(size))
         printableArea.updateSize(size);
-    }, [machineArea])
+    }, [size.x])
+
+    useEffect(() => {
+        // do sth once x&y change of machine
+        // setPrintableArea(new PrintablePlate(size))
+        printableArea.updateSize(size);
+    }, [size.y])
 
     useEffect(() => {
         addControllerEvents();
@@ -90,7 +96,7 @@ const RenderPanel = (props: any) => {
 
     useEffect(() => {
         canvas.current.renderScene()
-        // canvas.current.updateTransformControl2D();  ??????
+        // canvas.current.updateTransformControl2D();  sure to del.
     }, [renderingTimestamp])
 
     useEffect(() => {
@@ -156,10 +162,10 @@ const RenderPanel = (props: any) => {
             {isModelSelected && (
                 <div className='visualizer-notice'>
                     {(progress < 1 - EPSILON) && (
-                        <p>{t('Generating tool path... {{progress}}%')}</p>
+                        <p>{t('Generating gcode... {{progress}}%')}</p>
                     )}
                     {(progress > 1 - EPSILON) && (
-                        <p>{t('Generated tool path successfully.')}</p>
+                        <p>{t('Generated gcode successfully.')}</p>
                     )}
                 </div>
             )}

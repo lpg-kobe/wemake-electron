@@ -12,35 +12,13 @@ import Detector from 'three/examples/js/Detector';
 import PropTypes from 'prop-types';
 import TWEEN from '@tweenjs/tween.js';
 import Controls, { EVENTS } from './Controls';
-// import MSRControls from '../three-extensions/MSRControls';
-// import TransformControls from '../three-extensions/TransformControls';
-// import TransformControls2D from '../three-extensions/TransformControls2D';
-
+import { useTranslation } from 'react-i18next'
 
 const ANIMATION_DURATION = 500;
-const DEFAULT_MODEL_POSITION = new Vector3(0, 0, 0);
 
-
-class Canvas extends Component {
-    node = React.createRef();
-
-    static propTypes = {
-        backgroundGroup: PropTypes.object,
-        modelGroup: PropTypes.object.isRequired,
-        printableArea: PropTypes.object.isRequired,
-        transformSourceType: PropTypes.string, // 2D, 3D. Default is 3D
-        toolPathModelGroup: PropTypes.object,
-        gcodeLineGroup: PropTypes.object,
-        cameraInitialPosition: PropTypes.object.isRequired,
-        // callback
-        onSelectModel: PropTypes.func,
-        onUnselectAllModels: PropTypes.func,
-        onModelAfterTransform: PropTypes.func,
-        onModelTransform: PropTypes.func,
-
-        // tmp
-        showContextMenu: PropTypes.func
-    };
+const Canvas = (prop: any) => {
+    const { t } = useTranslation()
+    const node: any = useRef(null);
 
     controls = null;
 
@@ -81,7 +59,7 @@ class Canvas extends Component {
         this.group = null;
     }
 
-    componentDidMount() {
+    useEffect(() => {
         this.setupScene();
         this.setupControls();
 
@@ -97,16 +75,14 @@ class Canvas extends Component {
         this.renderScene();
 
         window.addEventListener('resize', this.resizeWindow, false);
-    }
-
-    componentWillUnmount() {
-        if (this.controls) {
+        return () => {
+          if (this.controls) {
             this.controls.dispose();
+          }
+          this.msrControls && this.msrControls.dispose();
+          this.transformControls && this.transformControls.dispose();
         }
-
-        this.msrControls && this.msrControls.dispose();
-        this.transformControls && this.transformControls.dispose();
-    }
+    }, [])
 
     getVisibleWidth() {
         return this.node.current.parentElement.clientWidth;
@@ -150,7 +126,6 @@ class Canvas extends Component {
         this.controls.setTarget(this.initialTarget);
         this.controls.setSelectableObjects(this.modelGroup.children);
 
-
         this.controls.on(EVENTS.UPDATE, () => {
             this.renderScene();
         });
@@ -171,18 +146,6 @@ class Canvas extends Component {
         this.controls.on(EVENTS.AFTER_TRANSFORM_OBJECT, () => {
             this.onModelAfterTransform();
         });
-
-        // this.msrControls = new MSRControls(this.group, this.camera, this.renderer.domElement, this.props.size);
-        // this.msrControls = new MSRControls(this.group, this.camera, this.renderer.domElement, this.props.size);
-        // triggered first, when "mouse down on canvas"
-        /*
-        this.msrControls.addEventListener(
-            'move',
-            () => {
-                this.updateTransformControl2D();
-            }
-        );
-        */
     }
 
     setTransformMode(mode) {
@@ -434,4 +397,4 @@ class Canvas extends Component {
     }
 }
 
-export default Canvas;
+export default Canvas

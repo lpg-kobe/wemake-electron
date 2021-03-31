@@ -53,12 +53,10 @@ const Home = (props: any) => {
 
 // state for home modal
 const mapStateToProps = (state) => {
-  const machine = state.machine;
-
   const { background } = state.laser;
-  const { selectedModelID, modelGroup, toolPathModelGroup, hasModel, renderingTimestamp } = state.laser;
+  const { selectedModelID, modelGroup, toolPathModelGroup, hasModel, renderingTimestamp } = state;
   return {
-    size: machine.size,
+    size: getMachineSize(state.machine),
     hasModel,
     selectedModelID,
     modelGroup,

@@ -147,7 +147,7 @@ export const actions = {
     },
 
     generateModel: (originalName, uploadName, sourceWidth, sourceHeight, mode) => (dispatch, getState) => {
-        const { size } = getState().machine;
+        const size = getMachineSize(getState().machine);
         const { modelGroup, toolPathModelGroup } = getState();
 
         const sourceType = path.extname(uploadName).toLowerCase() === '.svg' ? 'svg' : 'raster';
