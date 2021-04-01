@@ -29,7 +29,7 @@ const RenderPanel = (props: any) => {
         sendSelectedModelToBack
     } = props
 
-    const machineArea = size.x * size.y
+    const machineArea = size.x * size.y * size.x;
     const controllerEvents: any = {
         'task:completed': () => {
             setProgress(0)
@@ -46,7 +46,8 @@ const RenderPanel = (props: any) => {
     const canvas: any = useRef(null);
     const [printableArea, setPrintableArea]: any = useState(null)
     const [progress, setProgress]: any = useState(null)
-
+    setPrintableArea(new PrintablePlate(size))
+    
     function humanReadableTime(t: number) {
         const hours = Math.floor(t / 3600);
         const minutes = Math.ceil((t - hours * 3600) / 60);
@@ -77,13 +78,7 @@ const RenderPanel = (props: any) => {
         // do sth once x&y change of machine
         // setPrintableArea(new PrintablePlate(size))
         printableArea.updateSize(size);
-    }, [size.x])
-
-    useEffect(() => {
-        // do sth once x&y change of machine
-        // setPrintableArea(new PrintablePlate(size))
-        printableArea.updateSize(size);
-    }, [size.y])
+    }, [machineArea])
 
     useEffect(() => {
         addControllerEvents();
